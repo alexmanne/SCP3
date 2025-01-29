@@ -5,9 +5,9 @@ import os
 
 def diann_tables(protein_file="", peptide_file=""):
     """ Process and populate pandas DataFrames with the data from 
-    the diann protein and peptide files, saving only the Protein.Names, 
+    the DIA-NN protein and peptide files, saving only the Protein.Names, 
     Precursor.Id (for peptide), Protein.Group (for protein), and the 
-    file name columns.
+    file name columns. Also rename these columns.
 
     Parameters:
         protein_file (string): A pandas readable file with the protein data
@@ -22,19 +22,20 @@ def diann_tables(protein_file="", peptide_file=""):
     Raises:
         FileNotFoundError: If protein_file or peptide_file does not exist
     """
-    # Verify that the files are valid
+    ## Verify that the files are valid ##
     try:
         protein_table = pd.read_table(protein_file, low_memory=False)
     except FileNotFoundError:
         print(f"Protein file '{protein_file}' does not exist.")
         raise FileNotFoundError(f"Protein file '{protein_file}' does not exist.")
-
     try:
         peptide_table = pd.read_table(peptide_file, low_memory=False)
     except FileNotFoundError:
         print(f"Peptide file '{peptide_file}' does not exist.")
         raise FileNotFoundError(f"Peptide file '{peptide_file}' does not exist.")
     
+
+    ## Create the base abundance table ##
     # Filters out proteins with "contam" or that are null
     peptide_table = peptide_table[~peptide_table['Protein.Group'].str.contains("contam", na=False)]
     protein_table = protein_table[~protein_table['Protein.Group'].str.contains("contam", na=False)]
@@ -80,8 +81,88 @@ def diann_tables(protein_file="", peptide_file=""):
     return prot_abundance, pep_abundance
 
 
+def fragpipe_tables(protein_file="", peptide_file="", min_unique_peptides=1):
+    """ Process and populate pandas DataFrames with the data from 
+    the FragPipe protein and peptide files, saving only the Entry Name, 
+    Peptide Sequence (for peptide), Protein ID (for protein), and the 
+    file name columns. Also rename these columns.
+
+    Parameters:
+        protein_file (string): A pandas readable file with the protein data
+        peptide_file (string): A pandas readable file with the peptide data
+        min_unique_peptides (int): The minimum number of unique peptides
+
+    Returns:
+        prot_abundance (DataFrame): pandas DataFrame with protein data
+            Column names: "Organism", "Accession", and the run names
+        pep_abundance (DataFrame): pandas DataFrame with peptide data
+            Column names: "Organism", "Sequence", and the run names
+
+    Raises:
+        FileNotFoundError: If protein_file or peptide_file does not exist
+    """
+    ## Verify that the files are valid ##
+    try:
+        protein_table = pd.read_table(protein_file, low_memory=False)
+    except FileNotFoundError:
+        print(f"Protein file '{protein_file}' does not exist.")
+        raise FileNotFoundError(f"Protein file '{protein_file}' does not exist.")
+    try:
+        peptide_table = pd.read_table(peptide_file, low_memory=False)
+    except FileNotFoundError:
+        print(f"Peptide file '{peptide_file}' does not exist.")
+        raise FileNotFoundError(f"Peptide file '{peptide_file}' does not exist.")
+    
+
+    ## Create the base abundance table ##
+    # Filters out proteins with "contam" or that are null
+    peptide_table = peptide_table[~peptide_table['Protein.Group'].str.contains("contam", na=False)]
+    protein_table = protein_table[~protein_table['Protein.Group'].str.contains("contam", na=False)]
+
+    # Separate the columns of just the file names, 
+    # "Precursor.Id" for peptides, "Protein.Group" for protein (these are unique), 
+    # and "Protein.Names" (used to filter by organism)
+    peptide_cols = peptide_table.filter(regex=' Intensity|Peptide Sequence|Entry Names').columns
+    protein_cols = protein_table.filter(regex="\\\\|Protein.Group|Protein.Names").columns
+
+    # Create the abundance matrix
+    pep_abundance = peptide_table.loc[:, peptide_cols]
+    prot_abundance = protein_table.loc[:, protein_cols]
+
+
+    ## Rename the columns ##
+    # Create a list of just the full file path names
+    full_pep_run_names = peptide_cols.drop(['Precursor.Id', 'Protein.Names']).to_list()
+    full_prot_run_names = protein_cols.drop(['Protein.Group', 'Protein.Names']).to_list()
+
+    # If .raw is in the file name, strip off everything after .raw.
+    if ".raw" in full_pep_run_names[0]:
+        run_names = [name.split(".raw")[0] for name in full_prot_run_names]
+    else:
+        run_names = [os.path.splitext(name)[0] for name in full_prot_run_names]
+
+    # Create the renaming dictionary
+    pep_rename_dict = dict(zip(full_pep_run_names, run_names))
+    pep_rename_dict["Precursor.Id"] = "Sequence"
+    pep_rename_dict["Protein.Names"] = "Organism"
+    prot_rename_dict = dict(zip(full_prot_run_names, run_names))
+    prot_rename_dict["Protein.Group"] = "Accession"
+    prot_rename_dict["Protein.Names"] = "Organism"
+
+    # Rename the file columns
+    pep_abundance.rename(columns=pep_rename_dict, inplace=True)
+    prot_abundance.rename(columns=prot_rename_dict, inplace=True)
+
+    # Change the organism column to be just the organism name
+    pep_abundance["Organism"] = pep_abundance["Organism"].apply(lambda strg: strg.split("_")[-1])
+    prot_abundance["Organism"] = prot_abundance["Organism"].apply(lambda strg: strg.split("_")[-1])
+
+    return prot_abundance, pep_abundance
+
+
+
 def read_file(protein_file="", peptide_file="", file_id=0, 
-              processing_app='', min_peptides=1):
+              processing_app='', min_unique_peptides=1):
     """ Process and populate pandas DataFrames with the data from 
     the protein and peptide files, saving only the Organism, 
     Sequence (for peptide), Accession (for protein), and the 
@@ -94,7 +175,7 @@ def read_file(protein_file="", peptide_file="", file_id=0,
         file_id (int): The number denoting the group in the run ID
         processing_app (string): Denotes the application used for processing
             Currently supports: "diann", "fragpipe"
-        min_peptides (int): The minimum number of unique peptides (used in FragPipe)
+        min_unique_peptides (int): The minimum number of unique peptides (used in FragPipe)
 
     Returns:
         data_obj (dict): A dictionary with the following keys/values
@@ -106,7 +187,7 @@ def read_file(protein_file="", peptide_file="", file_id=0,
         ValueError: If the processing app is not accepted
         FileNotFoundError: If protein_file or peptide_file does not exist
     """
-    # Verify the processing application and return early if invalid
+    ## Verify the processing application ##
     supported_apps = ["diann", "fragpipe"]
     if processing_app not in supported_apps:
         print(f"Processing app {processing_app} not currently supported.")
@@ -120,8 +201,6 @@ def read_file(protein_file="", peptide_file="", file_id=0,
     elif processing_app == "fragpipe":
         pass
 
-
-    
 
     ## Rename the DataFrames with run_IDs ##
     # Create a list of the run_IDs
@@ -140,6 +219,7 @@ def read_file(protein_file="", peptide_file="", file_id=0,
 
     pep_abundance.rename(columns=pep_rename_dict, inplace=True)
     prot_abundance.rename(columns=prot_rename_dict, inplace=True)
+
     
     return {"run_metadata": run_metadata,
             "pep_abundance": pep_abundance, 
@@ -163,6 +243,11 @@ def read_files(filelist = []):
             "run_metadata": A pandas DataFrame mapping run names to ids
             "pep_abundance": A pandas DataFrame with peptide data
             "prot_abundance": A pandas DataFrame with protein data
+    
+    Raises:
+        ValueError: If the processing app is not accepted
+                    If the dictionary is not correct
+        FileNotFoundError: If protein_file or peptide_file does not exist
     """
     # Initiate the data_objects list
     data_objects = []
@@ -173,23 +258,26 @@ def read_files(filelist = []):
     for file_dict in filelist:
         # Give error messages if syntax is not correct
         if "protein_file" not in file_dict:
-            print('Dictionary Syntax incorrect. Must include "protein_file".')
-            return
+            print('Dictionary syntax incorrect. Must include "protein_file".')
+            raise ValueError('Dictionary syntax incorrect. Must include "protein_file".')
         if "peptide_file" not in file_dict:
-            print('Dictionary Syntax incorrect. Must include "peptide_file".')
-            return
+            print('Dictionary syntax incorrect. Must include "peptide_file".')
+            raise ValueError('Dictionary syntax incorrect. Must include "peptide_file".')
+        if "processing_app" not in file_dict:
+            print('Dictionary syntax incorrect. Must include "processing_app".')
+            raise ValueError('Dictionary syntax incorrect. Must include "processing_app".')
         
-        protein_file = file_dict["protein_file"]
-        peptide_file = file_dict["peptide_file"]
+    
+        ## currently set min peptides to 1. Can be changed with settings
+        min_unique_peptides = 1
 
         # Read the file and append it to data_objects
-        data_obj = read_file(protein_file, peptide_file, i, "diann")
-
-        # Give error message if returned early
-        if "early" in data_obj:
-            print(data_obj["early"])
-            return
-
+        data_obj = read_file(protein_file=file_dict["protein_file"], 
+                             peptide_file=file_dict["peptide_file"], 
+                             file_id=i, 
+                             processing_app= file_dict["processing_app"],
+                             min_unique_peptides=min_unique_peptides)
+        
         data_objects.append(data_obj)
         i += 1
         
