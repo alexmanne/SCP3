@@ -116,13 +116,13 @@ def fragpipe_tables(protein_file="", peptide_file="", min_unique_peptides=1):
 
     ## Create the base abundance table ##
     # Filters out proteins with "contam" or that are null
-    peptide_table = peptide_table[~peptide_table['Protein.Group'].str.contains("contam", na=False)]
+    peptide_table = peptide_table[~peptide_table['Protein'].str.contains("contam", na=False)]
     protein_table = protein_table[~protein_table['Protein.Group'].str.contains("contam", na=False)]
 
-    # Separate the columns of just the file names, 
-    # "Precursor.Id" for peptides, "Protein.Group" for protein (these are unique), 
+    # Separate the columns of Intensity reading,  
+    # "Peptide Sequence" for peptides, "Protein.Group" for protein (these are unique), 
     # and "Protein.Names" (used to filter by organism)
-    peptide_cols = peptide_table.filter(regex=' Intensity|Peptide Sequence|Entry Names').columns
+    peptide_cols = peptide_table.filter(regex=' Intensity|Peptide Sequence|Entry Name').columns
     protein_cols = protein_table.filter(regex="\\\\|Protein.Group|Protein.Names").columns
 
     # Create the abundance matrix
