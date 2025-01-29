@@ -15,7 +15,9 @@ def diann_tables(protein_file="", peptide_file=""):
 
     Returns:
         prot_abundance (DataFrame): pandas DataFrame with protein data
+            Column names: "Organism", "Accession", and the run names
         pep_abundance (DataFrame): pandas DataFrame with peptide data
+            Column names: "Organism", "Sequence", and the run names
 
     Raises:
         FileNotFoundError: If protein_file or peptide_file does not exist
@@ -55,9 +57,9 @@ def diann_tables(protein_file="", peptide_file=""):
 
     # If .raw is in the file name, strip off everything after .raw.
     if ".raw" in full_pep_run_names[0]:
-        run_names = [name.split(".raw")[0] for name in full_pep_run_names]
+        run_names = [name.split(".raw")[0] for name in full_prot_run_names]
     else:
-        run_names = [os.path.splitext(name)[0] for name in full_pep_run_names]
+        run_names = [os.path.splitext(name)[0] for name in full_prot_run_names]
 
     # Create the renaming dictionary
     pep_rename_dict = dict(zip(full_pep_run_names, run_names))
@@ -101,16 +103,17 @@ def read_file(protein_file="", peptide_file="", file_id=0,
             "prot_abundance": A pandas DataFrame with protein data
     
     Raises:
+        ValueError: If the processing app is not accepted
         FileNotFoundError: If protein_file or peptide_file does not exist
     """
     # Verify the processing application and return early if invalid
     supported_apps = ["diann", "fragpipe"]
     if processing_app not in supported_apps:
-        return {"early": (f"Processing app {processing_app} not currently supported.\n"
-                          f"Currently supports: {supported_apps}.")}
+        print(f"Processing app {processing_app} not currently supported.")
+        raise ValueError(f"Processing app {processing_app} not currently supported.")
     
 
-    ## Create a pandas DataFrame for peptide and protein ##
+    ## Create a pandas DataFrame for peptide and protein abundance ##
     if processing_app == "diann":
         prot_abundance, pep_abundance = diann_tables(protein_file, peptide_file)
     
