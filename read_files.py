@@ -242,11 +242,54 @@ def read_file(protein_file="", peptide_file="", file_id=0,
             "prot_abundance": prot_abundance}
 
 
+def group_data(data_objects):
+    """ Take the list of data objects and combine them into one.
+
+    Parameters:
+        data_objects (list): A list of dictionaries that contain the data 
+            objects to combine. Each data object has the following keys/values
+                "run_metadata": A pandas DataFrame mapping run names to ids
+                "pep_abundance": A pandas DataFrame with peptide data
+                "prot_abundance": A pandas DataFrame with protein data
+
+    Returns:
+        data_obj (dict): A dictionary with the following keys/values
+            "run_metadata": A pandas DataFrame mapping run names to ids
+            "pep_abundance": A pandas DataFrame with peptide data
+            "prot_abundance": A pandas DataFrame with protein data
+    
+    Raises:
+        KeyError: If one of the keys is missing from a data object
+    """
+    # Initialize a counter for error catching
+    i = 0
+
+    for data_obj in data_objects:
+
+        # Verify the keys are what we want them to be
+        for key in data_obj.keys:
+            if key not in ["run_metadata", "pep_abundance", "prot_abundance"]:
+                print(f"{key} not found in the {i} data object")
+                raise KeyError(f"{key} not found in the {i} data object")
+            
+        # Initialize the final data object if it is the first one. (if i==0)
+        if i == 0:
+            final_data_obj = data_obj
+            i += 1
+
+        # append the information to the final_data_object for the rest
+        else:
+            pass
+        
+
+    return final_data_obj
+
+
 
 def read_files(filelist = []):
     """ Read in the combined data from multiple runs. Call read_file 
     to process and populate pandas DataFrames with the data, saving 
-    only the Protein.Names, Precursor.Id (for peptide), Protein.Group 
+    only the Organism, Peptide Sequence (for peptide), Protein ID 
     (for protein), and the file name columns. Also call group_data to 
     combine the data into one data object.
 
@@ -299,6 +342,8 @@ def read_files(filelist = []):
         
         data_objects.append(data_obj)
         i += 1
+
+    return group_data(data_objects)
         
 
 
