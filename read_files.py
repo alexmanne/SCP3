@@ -66,9 +66,10 @@ def diann_1_9_tables(protein_file="", peptide_file=""):
     pep_rename_dict = dict(zip(full_pep_run_names, run_names))
     pep_rename_dict["Precursor.Id"] = "Sequence"
     pep_rename_dict["Protein.Names"] = "Organism"
+
     prot_rename_dict = dict(zip(full_prot_run_names, run_names))
-    prot_rename_dict["Protein.Group"] = "Accession"
     prot_rename_dict["Protein.Names"] = "Organism"
+    prot_rename_dict["Protein.Group"] = "Accession"
 
     # Rename the file columns
     pep_abundance.rename(columns=pep_rename_dict, inplace=True)
@@ -124,7 +125,6 @@ def fragpipe_22_tables(protein_file="", peptide_file="",
 
     # Also filter out the proteins with total peptide count less than min_unique_peptides
     protein_table.query("`Combined Total Peptides` >= @min_unique_peptides", inplace=True)
-    print(protein_table["Combined Total Peptides"].min())
 
     # Separate the columns of
     # "Peptide Sequence" (unique) for peptides, 
@@ -148,29 +148,31 @@ def fragpipe_22_tables(protein_file="", peptide_file="",
 
 
     # ## Rename the columns ##
-    # Create a list of just the full file path names
-    full_pep_run_names = peptide_cols.drop(['Peptide Sequece', 'Entry Name']).to_list()
-    full_prot_run_names = protein_cols.drop(['Protein ID', 'Entry Name']).to_list()
+    # Remove the column names that are not run names 
+    peptide_cols.remove('Peptide Sequence')
+    peptide_cols.remove('Entry Name')
+    protein_cols.remove('Protein ID')
+    protein_cols.remove('Entry Name')
 
     # Get just the run name (Assumes the run name has no spaces)
-    run_names = [name.split(" ")[0] for name in full_prot_run_names]
+    run_names = [name.split(" ")[0] for name in peptide_cols]
     
     # Create the renaming dictionary
-    pep_rename_dict = dict(zip(full_pep_run_names, run_names))
-    pep_rename_dict["Peptide Sequece"] = "Sequence"
+    pep_rename_dict = dict(zip(peptide_cols, run_names))
+    pep_rename_dict["Peptide Sequence"] = "Sequence"
     pep_rename_dict["Entry Name"] = "Organism"
-    prot_rename_dict = dict(zip(full_prot_run_names, run_names))
-    prot_rename_dict["Protein ID"] = "Accession"
+    prot_rename_dict = dict(zip(protein_cols, run_names))
     prot_rename_dict["Entry Name"] = "Organism"
+    prot_rename_dict["Protein ID"] = "Accession"
 
-    # # Rename the file columns
-    # pep_abundance.rename(columns=pep_rename_dict, inplace=True)
-    # prot_abundance.rename(columns=prot_rename_dict, inplace=True)
+    # Rename the file columns
+    pep_abundance.rename(columns=pep_rename_dict, inplace=True)
+    prot_abundance.rename(columns=prot_rename_dict, inplace=True)
 
-    # # Change the organism column to be just the organism name 
+    # Change the organism column to be just the organism name 
     # (Assumes the organism name is after an underscore "_")
-    # pep_abundance["Organism"] = pep_abundance["Organism"].apply(lambda strg: strg.split("_")[-1])
-    # prot_abundance["Organism"] = prot_abundance["Organism"].apply(lambda strg: strg.split("_")[-1])
+    pep_abundance["Organism"] = pep_abundance["Organism"].apply(lambda strg: strg.split("_")[-1])
+    prot_abundance["Organism"] = prot_abundance["Organism"].apply(lambda strg: strg.split("_")[-1])
 
     return prot_abundance, pep_abundance
 
@@ -216,8 +218,7 @@ def read_file(protein_file="", peptide_file="", file_id=0,
     elif processing_app == "fragpipe":
         prot_abundance, pep_abundance = fragpipe_22_tables(protein_file, peptide_file,
                                                            min_unique_peptides, use_maxlfq)
-
-
+    
     ## Rename the DataFrames with run_IDs ##
     # Create a list of the run_IDs
     run_names = pep_abundance.columns.drop(["Sequence", "Organism"]).to_list()
@@ -235,7 +236,6 @@ def read_file(protein_file="", peptide_file="", file_id=0,
 
     pep_abundance.rename(columns=pep_rename_dict, inplace=True)
     prot_abundance.rename(columns=prot_rename_dict, inplace=True)
-
     
     return {"run_metadata": run_metadata,
             "pep_abundance": pep_abundance, 
