@@ -122,9 +122,13 @@ def fragpipe_22_tables(protein_file="", peptide_file="",
     peptide_table = peptide_table[~peptide_table['Protein'].str.contains("contam", na=False)]
     protein_table = protein_table[~protein_table['Protein'].str.contains("contam", na=False)]
 
+    # Also filter out the proteins with total peptide count less than min_unique_peptides
+    protein_table.query("`Combined Total Peptides` >= @min_unique_peptides", inplace=True)
+    print(protein_table["Combined Total Peptides"].min())
+
     # Separate the columns of
-    # "Peptide Sequence" for peptides, 
-    # "Protein ID" for protein (these are unique), and
+    # "Peptide Sequence" (unique) for peptides, 
+    # "Protein ID" (unique) for protein, and
     # "Entry Name" (used to filter by organism)
     peptide_cols = peptide_table.filter(regex='Peptide Sequence|Entry Name').columns.to_list()
     protein_cols = protein_table.filter(regex="Protein ID|Entry Name").columns.to_list()
@@ -134,13 +138,9 @@ def fragpipe_22_tables(protein_file="", peptide_file="",
         peptide_cols += (peptide_table.filter(regex=' MaxLFQ Intensity').columns.to_list())
         protein_cols += (protein_table.filter(regex=' MaxLFQ Intensity').columns.to_list())
     else:
-        # The regex ignores strings matching '.*MaxLFQ' NOT YET! NEEDS TO BE FIXED
-        ########################
-        peptide_cols += (peptide_table.filter(regex='(?!.*MaxLFQ).*Intensity').columns.to_list())
-        protein_cols += (protein_table.filter(regex='(?!.*MaxLFQ).*Intensity').columns.to_list())
-
-    print(peptide_cols)
-    print(protein_cols)
+        # The regex uses a negative lookbehind to ignore strings with 'MaxLFQ' 
+        peptide_cols += (peptide_table.filter(regex='(?<!MaxLFQ) Intensity').columns.to_list())
+        protein_cols += (protein_table.filter(regex='(?<!MaxLFQ) Intensity').columns.to_list())
 
     # Create the abundance matrix
     pep_abundance = peptide_table.loc[:, peptide_cols]
@@ -148,29 +148,27 @@ def fragpipe_22_tables(protein_file="", peptide_file="",
 
 
     # ## Rename the columns ##
-    # # Create a list of just the full file path names
-    # full_pep_run_names = peptide_cols.drop(['Precursor.Id', 'Protein.Names']).to_list()
-    # full_prot_run_names = protein_cols.drop(['Protein.Group', 'Protein.Names']).to_list()
+    # Create a list of just the full file path names
+    full_pep_run_names = peptide_cols.drop(['Peptide Sequece', 'Entry Name']).to_list()
+    full_prot_run_names = protein_cols.drop(['Protein ID', 'Entry Name']).to_list()
 
-    # # If .raw is in the file name, strip off everything after .raw.
-    # if ".raw" in full_pep_run_names[0]:
-    #     run_names = [name.split(".raw")[0] for name in full_prot_run_names]
-    # else:
-    #     run_names = [os.path.splitext(name)[0] for name in full_prot_run_names]
-
-    # # Create the renaming dictionary
-    # pep_rename_dict = dict(zip(full_pep_run_names, run_names))
-    # pep_rename_dict["Precursor.Id"] = "Sequence"
-    # pep_rename_dict["Protein.Names"] = "Organism"
-    # prot_rename_dict = dict(zip(full_prot_run_names, run_names))
-    # prot_rename_dict["Protein.Group"] = "Accession"
-    # prot_rename_dict["Protein.Names"] = "Organism"
+    # Get just the run name (Assumes the run name has no spaces)
+    run_names = [name.split(" ")[0] for name in full_prot_run_names]
+    
+    # Create the renaming dictionary
+    pep_rename_dict = dict(zip(full_pep_run_names, run_names))
+    pep_rename_dict["Peptide Sequece"] = "Sequence"
+    pep_rename_dict["Entry Name"] = "Organism"
+    prot_rename_dict = dict(zip(full_prot_run_names, run_names))
+    prot_rename_dict["Protein ID"] = "Accession"
+    prot_rename_dict["Entry Name"] = "Organism"
 
     # # Rename the file columns
     # pep_abundance.rename(columns=pep_rename_dict, inplace=True)
     # prot_abundance.rename(columns=prot_rename_dict, inplace=True)
 
-    # # Change the organism column to be just the organism name
+    # # Change the organism column to be just the organism name 
+    # (Assumes the organism name is after an underscore "_")
     # pep_abundance["Organism"] = pep_abundance["Organism"].apply(lambda strg: strg.split("_")[-1])
     # prot_abundance["Organism"] = prot_abundance["Organism"].apply(lambda strg: strg.split("_")[-1])
 
@@ -287,7 +285,7 @@ def read_files(filelist = []):
         
     
         ## currently set min peptides to 1. Can be changed with settings
-        min_unique_peptides = 1
+        min_unique_peptides = 5
         ## currently set use_maxlfq to False. Can be changed with settings
         use_maxlfq = False
 
