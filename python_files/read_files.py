@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import os
+import yaml
 
 
 def diann_1_9_tables(protein_file="", peptide_file=""):
@@ -80,6 +81,8 @@ def diann_1_9_tables(protein_file="", peptide_file=""):
     prot_abundance["Organism"] = prot_abundance["Organism"].apply(lambda strg: strg.split("_")[-1])
 
     return prot_abundance, pep_abundance
+
+
 
 
 def fragpipe_22_tables(protein_file="", peptide_file="", 
@@ -178,6 +181,8 @@ def fragpipe_22_tables(protein_file="", peptide_file="",
 
 
 
+
+
 def read_file(protein_file="", peptide_file="", file_id=0, 
               processing_app='', min_unique_peptides=1, use_maxlfq=False):
     """ Process and populate pandas DataFrames with the data from 
@@ -242,6 +247,8 @@ def read_file(protein_file="", peptide_file="", file_id=0,
             "prot_abundance": prot_abundance}
 
 
+
+
 def group_data(data_objects):
     """ Take the list of data objects and combine them into one.
 
@@ -286,7 +293,9 @@ def group_data(data_objects):
 
 
 
-def read_files(filelist = []):
+
+
+def read_files(yaml_file):
     """ Read in the combined data from multiple runs. Call read_file 
     to process and populate pandas DataFrames with the data, saving 
     only the Organism, Peptide Sequence (for peptide), Protein ID 
@@ -294,8 +303,8 @@ def read_files(filelist = []):
     combine the data into one data object.
 
     Parameters:
-        filelist (list): A list of dictionaries that contain the protein
-            and peptide matrices to analyze
+        yaml_file (string): A string with the name of the yaml file
+            containing the names of peptide/protein files
 
     Returns:
         data_obj (dict): A dictionary with the following keys/values
@@ -306,8 +315,17 @@ def read_files(filelist = []):
     Raises:
         ValueError: If the processing app is not accepted
                     If the dictionary is not correct
-        FileNotFoundError: If protein_file or peptide_file does not exist
+        FileNotFoundError: If the yaml_file, protein_file, or 
+                    peptide_file do not exist
     """
+    ## Verify that the file is valid ##
+    try:
+        with open(yaml_file, "r") as f:
+            filelist = yaml.safe_load(f)
+    except FileNotFoundError:
+        print(f"Protein file '{yaml_file}' does not exist.")
+        raise FileNotFoundError(f"Protein file '{yaml_file}' does not exist.")
+
     # Initiate the data_objects list
     data_objects = []
 
@@ -317,14 +335,14 @@ def read_files(filelist = []):
     for file_dict in filelist:
         # Give error messages if syntax is not correct
         if "protein_file" not in file_dict:
-            print('Dictionary syntax incorrect. Must include "protein_file".')
-            raise ValueError('Dictionary syntax incorrect. Must include "protein_file".')
+            print('yaml syntax incorrect. Must include "protein_file".')
+            raise ValueError('yaml syntax incorrect. Must include "protein_file".')
         if "peptide_file" not in file_dict:
-            print('Dictionary syntax incorrect. Must include "peptide_file".')
-            raise ValueError('Dictionary syntax incorrect. Must include "peptide_file".')
+            print('yaml syntax incorrect. Must include "peptide_file".')
+            raise ValueError('yaml syntax incorrect. Must include "peptide_file".')
         if "processing_app" not in file_dict:
-            print('Dictionary syntax incorrect. Must include "processing_app".')
-            raise ValueError('Dictionary syntax incorrect. Must include "processing_app".')
+            print('yaml syntax incorrect. Must include "processing_app".')
+            raise ValueError('yaml syntax incorrect. Must include "processing_app".')
         
     
         ## currently set min peptides to 1. Can be changed with settings
