@@ -1,0 +1,24 @@
+# This file creates a list of the files to import
+
+# Be sure to include the following key words
+# - peptide_file: path to the file
+#   protein_file: path to the file
+#   processing_app: 
+
+# Use a - to start a new file group
+
+
+# File 0
+- peptide_file: input/report.pr_matrix.tsv
+  protein_file: input/report.pg_matrix.tsv
+  processing_app: diann
+
+# File 1
+- peptide_file: input/HYE_pep_matrix.tsv
+  protein_file: input/HYE_prot_matrix.tsv
+  processing_app: diann
+
+# File 2
+- peptide_file: input/fragpipe_combined_peptide.tsv
+  protein_file: input/fragpipe_combined_protein.tsv
+  processing_app: fragpipe

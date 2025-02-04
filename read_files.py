@@ -267,7 +267,7 @@ def group_data(data_objects):
     for data_obj in data_objects:
 
         # Verify the keys are what we want them to be
-        for key in data_obj.keys:
+        for key in data_obj.keys():
             if key not in ["run_metadata", "pep_abundance", "prot_abundance"]:
                 print(f"{key} not found in the {i} data object")
                 raise KeyError(f"{key} not found in the {i} data object")
