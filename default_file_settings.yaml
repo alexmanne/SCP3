@@ -1,0 +1,40 @@
+# This file creates a list of the files to import
+
+# Be sure to include the following key words
+# - peptide_file: 'path_to_file'
+#   protein_file: 'path_to_file'
+#   processing_app: diann
+
+# Use a '-' to start a new file group
+
+
+# File 0
+- peptide_file: input/PUT FILE NAME HERE
+  protein_file: input/PUT FILE NAME HERE
+  processing_app: diann    # Options are diann or fragpipe
+
+# File 1
+- peptide_file: input/PUT FILE NAME HERE
+  protein_file: input/PUT FILE NAME HERE
+  processing_app: diann    # Options are diann or fragpipe
+
+# File 2
+- peptide_file: input/PUT FILE NAME HERE
+  protein_file: input/PUT FILE NAME HERE
+  processing_app: diann    # Options are diann or fragpipe
+
+# File 3
+- peptide_file: input/PUT FILE NAME HERE
+  protein_file: input/PUT FILE NAME HERE
+  processing_app: diann    # Options are diann or fragpipe
+
+# File 4
+- peptide_file: input/PUT FILE NAME HERE
+  protein_file: input/PUT FILE NAME HERE
+  processing_app: diann    # Options are diann or fragpipe
+
+# File 5
+- peptide_file: input/PUT FILE NAME HERE
+  protein_file: input/PUT FILE NAME HERE
+  processing_app: diann    # Options are diann or fragpipe
+
