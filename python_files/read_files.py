@@ -294,12 +294,12 @@ def group_data(data_objects):
             # Outer join the peptide matrices on the Sequence column
             final_data_obj["pep_abundance"] = pd.merge(final_data_obj["pep_abundance"], 
                                                        data_obj["pep_abundance"],
-                                                       how="outer", on="Sequence")
+                                                       how="outer", on=["Sequence", "Organism"])
             
             # Outer join the protein matrices on the Accession column
             final_data_obj["prot_abundance"] = pd.merge(final_data_obj["prot_abundance"], 
                                                        data_obj["prot_abundance"],
-                                                       how="outer", on="Accession")
+                                                       how="outer", on=["Accession", "Organism"])
 
     return final_data_obj
 

@@ -9,32 +9,17 @@
 
 
 # File 0
-- peptide_file: input/PUT FILE NAME HERE
-  protein_file: input/PUT FILE NAME HERE
-  processing_app: diann    # Options are diann or fragpipe
+- peptide_file: input/fragpipe_combined_peptide.tsv
+  protein_file: input/fragpipe_combined_protein.tsv
+  processing_app: fragpipe    # Options are diann or fragpipe
 
 # File 1
-- peptide_file: input/PUT FILE NAME HERE
-  protein_file: input/PUT FILE NAME HERE
+- peptide_file: input/report.pr_matrix.tsv
+  protein_file: input/report.pg_matrix.tsv
   processing_app: diann    # Options are diann or fragpipe
 
 # File 2
-- peptide_file: input/PUT FILE NAME HERE
-  protein_file: input/PUT FILE NAME HERE
-  processing_app: diann    # Options are diann or fragpipe
-
-# File 3
-- peptide_file: input/PUT FILE NAME HERE
-  protein_file: input/PUT FILE NAME HERE
-  processing_app: diann    # Options are diann or fragpipe
-
-# File 4
-- peptide_file: input/PUT FILE NAME HERE
-  protein_file: input/PUT FILE NAME HERE
-  processing_app: diann    # Options are diann or fragpipe
-
-# File 5
-- peptide_file: input/PUT FILE NAME HERE
-  protein_file: input/PUT FILE NAME HERE
+- peptide_file: input/HYE_pep_matrix.tsv
+  protein_file: input/HYE_prot_matrix.tsv
   processing_app: diann    # Options are diann or fragpipe
 
