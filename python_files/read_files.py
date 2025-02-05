@@ -286,8 +286,20 @@ def group_data(data_objects):
 
         # append the information to the final_data_object for the rest
         else:
-            pass
-        
+            # Concatenate the run metadata and reset the index
+            final_data_obj["run_metadata"] = pd.concat([final_data_obj["run_metadata"], 
+                                                        data_obj["run_metadata"]])
+            final_data_obj["run_metadata"].reset_index(drop=True, inplace=True)
+
+            # Outer join the peptide matrices on the Sequence column
+            final_data_obj["pep_abundance"] = pd.merge(final_data_obj["pep_abundance"], 
+                                                       data_obj["pep_abundance"],
+                                                       how="outer", on="Sequence")
+            
+            # Outer join the protein matrices on the Accession column
+            final_data_obj["prot_abundance"] = pd.merge(final_data_obj["prot_abundance"], 
+                                                       data_obj["prot_abundance"],
+                                                       how="outer", on="Accession")
 
     return final_data_obj
 
@@ -361,6 +373,7 @@ def read_files(yaml_file):
         data_objects.append(data_obj)
         i += 1
 
+    # Call group data to put all of the data into one data object
     return group_data(data_objects)
         
 
