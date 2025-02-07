@@ -16,9 +16,9 @@ def diann_1_9_tables(protein_file="", peptide_file=""):
 
     Returns:
         prot_abundance (DataFrame): pandas DataFrame with protein data
-            Column names: "Organism", "Accession", and the run names
+            Column names: "Protein Name", "Accession", and the run names
         pep_abundance (DataFrame): pandas DataFrame with peptide data
-            Column names: "Organism", "Sequence", and the run names
+            Column names: "Protein Name", "Sequence", and the run names
 
     Raises:
         FileNotFoundError: If protein_file or peptide_file does not exist
@@ -66,19 +66,15 @@ def diann_1_9_tables(protein_file="", peptide_file=""):
     # Create the renaming dictionary
     pep_rename_dict = dict(zip(full_pep_run_names, run_names))
     pep_rename_dict["Precursor.Id"] = "Sequence"
-    pep_rename_dict["Protein.Names"] = "Organism"
+    pep_rename_dict["Protein.Names"] = "Protein Name"
 
     prot_rename_dict = dict(zip(full_prot_run_names, run_names))
-    prot_rename_dict["Protein.Names"] = "Organism"
+    prot_rename_dict["Protein.Names"] = "Protein Name"
     prot_rename_dict["Protein.Group"] = "Accession"
 
     # Rename the file columns
     pep_abundance.rename(columns=pep_rename_dict, inplace=True)
     prot_abundance.rename(columns=prot_rename_dict, inplace=True)
-
-    # Change the organism column to be just the organism name
-    pep_abundance["Organism"] = pep_abundance["Organism"].apply(lambda strg: strg.split("_")[-1])
-    prot_abundance["Organism"] = prot_abundance["Organism"].apply(lambda strg: strg.split("_")[-1])
 
     return prot_abundance, pep_abundance
 
@@ -101,9 +97,9 @@ def fragpipe_22_tables(protein_file="", peptide_file="",
 
     Returns:
         prot_abundance (DataFrame): pandas DataFrame with protein data
-            Column names: "Organism", "Accession", and the run names
+            Column names: "Protein Name", "Accession", and the run names
         pep_abundance (DataFrame): pandas DataFrame with peptide data
-            Column names: "Organism", "Sequence", and the run names
+            Column names: "Protein Name", "Sequence", and the run names
 
     Raises:
         FileNotFoundError: If protein_file or peptide_file does not exist
@@ -163,19 +159,14 @@ def fragpipe_22_tables(protein_file="", peptide_file="",
     # Create the renaming dictionary
     pep_rename_dict = dict(zip(peptide_cols, run_names))
     pep_rename_dict["Peptide Sequence"] = "Sequence"
-    pep_rename_dict["Entry Name"] = "Organism"
+    pep_rename_dict["Entry Name"] = "Protein Name"
     prot_rename_dict = dict(zip(protein_cols, run_names))
-    prot_rename_dict["Entry Name"] = "Organism"
+    prot_rename_dict["Entry Name"] = "Protein Name"
     prot_rename_dict["Protein ID"] = "Accession"
 
     # Rename the file columns
     pep_abundance.rename(columns=pep_rename_dict, inplace=True)
     prot_abundance.rename(columns=prot_rename_dict, inplace=True)
-
-    # Change the organism column to be just the organism name 
-    # (Assumes the organism name is after an underscore "_")
-    pep_abundance["Organism"] = pep_abundance["Organism"].apply(lambda strg: strg.split("_")[-1])
-    prot_abundance["Organism"] = prot_abundance["Organism"].apply(lambda strg: strg.split("_")[-1])
 
     return prot_abundance, pep_abundance
 
@@ -226,7 +217,7 @@ def read_file(protein_file="", peptide_file="", file_id=0,
     
     ## Rename the DataFrames with run_IDs ##
     # Create a list of the run_IDs
-    run_names = pep_abundance.columns.drop(["Sequence", "Organism"]).to_list()
+    run_names = pep_abundance.columns.drop(["Sequence", "Protein Name"]).to_list()
     num_files = len(run_names)
     ID_generator = lambda x: str(file_id) + "-" + str(x)
     run_IDs = [ID_generator(i) for i in range(num_files)]
@@ -294,12 +285,12 @@ def group_data(data_objects):
             # Outer join the peptide matrices on the Sequence column
             final_data_obj["pep_abundance"] = pd.merge(final_data_obj["pep_abundance"], 
                                                        data_obj["pep_abundance"],
-                                                       how="outer", on=["Sequence", "Organism"])
+                                                       how="outer", on=["Sequence", "Protein Name"])
             
             # Outer join the protein matrices on the Accession column
             final_data_obj["prot_abundance"] = pd.merge(final_data_obj["prot_abundance"], 
                                                        data_obj["prot_abundance"],
-                                                       how="outer", on=["Accession", "Organism"])
+                                                       how="outer", on=["Accession", "Protein Name"])
 
     return final_data_obj
 
