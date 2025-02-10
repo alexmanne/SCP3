@@ -19,12 +19,8 @@
 #   processing_app: fragpipe    # Options are diann or fragpipe
 
 # File 2
-- peptide_file: input/combined_peptide_1.tsv
-  protein_file: input/combined_protein_1.tsv
-  processing_app: fragpipe    # Options are diann or fragpipe
+- peptide_file: input/report.pr_matrix.tsv
+  protein_file: input/report.pg_matrix.tsv
+  processing_app: diann    # Options are diann or fragpipe
 
-# File 3
-- peptide_file: input/fragpipe_combined_peptide.tsv
-  protein_file: input/fragpipe_combined_protein.tsv
-  processing_app: fragpipe    # Options are diann or fragpipe
 

@@ -291,6 +291,10 @@ def group_data(data_objects):
             final_data_obj["prot_abundance"] = pd.merge(final_data_obj["prot_abundance"], 
                                                        data_obj["prot_abundance"],
                                                        how="outer", on=["Accession", "Protein Name"])
+            
+     # Replace 0 values with nan to decrease complexity
+    final_data_obj["pep_abundance"].replace(0, np.nan, inplace=True)
+    final_data_obj["prot_abundance"].replace(0, np.nan, inplace=True)
 
     return final_data_obj
 
