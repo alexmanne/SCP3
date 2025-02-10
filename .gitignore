@@ -1,6 +1,6 @@
 input/*
 csv/*
 images/*
-*__pycache__/*
+*__pycache__*
 .vscode/*
 data_obj/*
