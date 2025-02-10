@@ -273,7 +273,6 @@ def group_data(data_objects):
         # Initialize the final data object if it is the first one. (if i==0)
         if i == 0:
             final_data_obj = data_obj
-            i += 1
 
         # append the information to the final_data_object for the rest
         else:
@@ -292,6 +291,9 @@ def group_data(data_objects):
                                                        data_obj["prot_abundance"],
                                                        how="outer", on=["Accession", "Protein Name"])
             
+        i += 1
+        print(i)
+
      # Replace 0 values with nan to decrease complexity
     final_data_obj["pep_abundance"].replace(0, np.nan, inplace=True)
     final_data_obj["prot_abundance"].replace(0, np.nan, inplace=True)
