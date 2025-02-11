@@ -8,7 +8,7 @@
 # Use a '-' to start a new file group
 
 
-- peptide_file: input/fp_TK1005_combined_ion.tsv
+- peptide_file: input/fp_TK1005_combined_peptide.tsv
   protein_file: input/fp_TK1005_combined_protein.tsv
   processing_app: fragpipe    # Options are diann or fragpipe
 

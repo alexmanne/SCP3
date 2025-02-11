@@ -119,8 +119,8 @@ def fragpipe_22_tables(protein_file="", peptide_file="",
         raise FileNotFoundError(f"Peptide file '{peptide_file}' does not exist.")
     
     if "M/Z" not in peptide_table:
-        print(f"Peptide file '{peptide_file}' must be the combined_ion.tsv file.")
-        raise FileNotFoundError(f"Peptide file '{peptide_file}' must be the combined_ion.tsv file.")
+        print(f"Peptide file must be the combined_ion.tsv file.")
+        raise FileNotFoundError(f"Peptide file must be the combined_ion.tsv file.")
     
 
     ## Create the base abundance table ##
