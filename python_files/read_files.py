@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import os
 import yaml
+import time
 
 
 def diann_1_9_tables(protein_file="", peptide_file=""):
@@ -112,6 +113,7 @@ def fragpipe_22_tables(protein_file="", peptide_file="",
     except FileNotFoundError:
         print(f"Protein file '{protein_file}' does not exist.")
         raise FileNotFoundError(f"Protein file '{protein_file}' does not exist.")
+    
     try:
         peptide_table = pd.read_table(peptide_file, low_memory=False)
     except FileNotFoundError:
@@ -269,6 +271,7 @@ def group_data(data_objects):
     Raises:
         KeyError: If one of the keys is missing from a data object
     """
+
     # Initialize a counter for error catching
     i = 0
 
@@ -302,7 +305,6 @@ def group_data(data_objects):
                                                        how="outer", on=["Accession", "Protein Name"])
             
         i += 1
-        print(i)
 
      # Replace 0 values with nan to decrease complexity
     final_data_obj["pep_abundance"].replace(0, np.nan, inplace=True)
