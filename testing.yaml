@@ -8,68 +8,73 @@
 # Use a '-' to start a new file group
 
 
-# File 0
-- peptide_file: input/dia_report.HYE_pr_matrix.tsv
-  protein_file: input/dia_report.HYE_pg_matrix.tsv
-  processing_app: diann    # Options are diann or fragpipe
+- peptide_file: input/fp_TK1005_combined_ion.tsv
+  protein_file: input/fp_TK1005_combined_protein.tsv
+  processing_app: fragpipe    # Options are diann or fragpipe
 
-# File 1
-- peptide_file: input/dia_report.pr_matrix.tsv
-  protein_file: input/dia_report.pg_matrix.tsv
-  processing_app: diann    # Options are diann or fragpipe
 
-# File 2
-- peptide_file: input/dia_report.pr_matrix2.tsv
-  protein_file: input/dia_report.pg_matrix2.tsv
-  processing_app: diann    # Options are diann or fragpipe
+# # File 0
+# - peptide_file: input/dia_report.HYE_pr_matrix.tsv
+#   protein_file: input/dia_report.HYE_pg_matrix.tsv
+#   processing_app: diann    # Options are diann or fragpipe
 
-# File 3
-- peptide_file: input/dia_report.pr_matrix3.tsv
-  protein_file: input/dia_report.pg_matrix3.tsv
-  processing_app: diann    # Options are diann or fragpipe
+# # File 1
+# - peptide_file: input/dia_report.pr_matrix.tsv
+#   protein_file: input/dia_report.pg_matrix.tsv
+#   processing_app: diann    # Options are diann or fragpipe
 
-# File 4
-- peptide_file: input/dia_report.pr_matrix4.tsv
-  protein_file: input/dia_report.pg_matrix4.tsv
-  processing_app: diann    # Options are diann or fragpipe
+# # File 2
+# - peptide_file: input/dia_report.pr_matrix2.tsv
+#   protein_file: input/dia_report.pg_matrix2.tsv
+#   processing_app: diann    # Options are diann or fragpipe
 
-# File 5
-- peptide_file: input/dia_report.pr_matrix5.tsv
-  protein_file: input/dia_report.pg_matrix5.tsv
-  processing_app: diann    # Options are diann or fragpipe
+# # File 3
+# - peptide_file: input/dia_report.pr_matrix3.tsv
+#   protein_file: input/dia_report.pg_matrix3.tsv
+#   processing_app: diann    # Options are diann or fragpipe
 
-# File 6
-- peptide_file: input/dia_report.pr_matrix6.tsv
-  protein_file: input/dia_report.pg_matrix6.tsv
-  processing_app: diann    # Options are diann or fragpipe
+# # File 4
+# - peptide_file: input/dia_report.pr_matrix4.tsv
+#   protein_file: input/dia_report.pg_matrix4.tsv
+#   processing_app: diann    # Options are diann or fragpipe
 
-# File 7
-- peptide_file: input/dia_report.pr_matrix7.tsv
-  protein_file: input/dia_report.pg_matrix7.tsv
-  processing_app: diann    # Options are diann or fragpipe
+# # File 5
+# - peptide_file: input/dia_report.pr_matrix5.tsv
+#   protein_file: input/dia_report.pg_matrix5.tsv
+#   processing_app: diann    # Options are diann or fragpipe
 
-# File 8
-- peptide_file: input/dia_report.pr_matrix8.tsv
-  protein_file: input/dia_report.pg_matrix8.tsv
-  processing_app: diann    # Options are diann or fragpipe
+# # File 6
+# - peptide_file: input/dia_report.pr_matrix6.tsv
+#   protein_file: input/dia_report.pg_matrix6.tsv
+#   processing_app: diann    # Options are diann or fragpipe
 
-# File 9
-- peptide_file: input/dia_report.pr_matrix9.tsv
-  protein_file: input/dia_report.pg_matrix9.tsv
-  processing_app: diann    # Options are diann or fragpipe
+# # File 7
+# - peptide_file: input/dia_report.pr_matrix7.tsv
+#   protein_file: input/dia_report.pg_matrix7.tsv
+#   processing_app: diann    # Options are diann or fragpipe
 
-# File 10
-- peptide_file: input/dia_report.pr_matrix10.tsv
-  protein_file: input/dia_report.pg_matrix10.tsv
-  processing_app: diann    # Options are diann or fragpipe
+# # File 8
+# - peptide_file: input/dia_report.pr_matrix8.tsv
+#   protein_file: input/dia_report.pg_matrix8.tsv
+#   processing_app: diann    # Options are diann or fragpipe
 
-# File 11
-- peptide_file: input/dia_report.pr_matrix11.tsv
-  protein_file: input/dia_report.pg_matrix11.tsv
-  processing_app: diann    # Options are diann or fragpipe
+# # File 9
+# - peptide_file: input/dia_report.pr_matrix9.tsv
+#   protein_file: input/dia_report.pg_matrix9.tsv
+#   processing_app: diann    # Options are diann or fragpipe
 
-# File 12
-- peptide_file: input/dia_report.pr_matrix12.tsv
-  protein_file: input/dia_report.pg_matrix12.tsv
-  processing_app: diann    # Options are diann or fragpipe
+# # File 10
+# - peptide_file: input/dia_report.pr_matrix10.tsv
+#   protein_file: input/dia_report.pg_matrix10.tsv
+#   processing_app: diann    # Options are diann or fragpipe
+
+# # File 11
+# - peptide_file: input/dia_report.pr_matrix11.tsv
+#   protein_file: input/dia_report.pg_matrix11.tsv
+#   processing_app: diann    # Options are diann or fragpipe
+
+# # File 12
+# - peptide_file: input/dia_report.pr_matrix12.tsv
+#   protein_file: input/dia_report.pg_matrix12.tsv
+#   processing_app: diann    # Options are diann or fragpipe
 
