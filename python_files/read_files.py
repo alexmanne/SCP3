@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import os
 import yaml
-import time
+from time import time
 
 
 def diann_1_9_tables(protein_file="", peptide_file=""):
