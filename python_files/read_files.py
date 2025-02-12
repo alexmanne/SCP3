@@ -5,79 +5,154 @@ import yaml
 from time import time
 
 
-def diann_1_9_tables(protein_file="", peptide_file=""):
+# def diann_1_9_tables(protein_file="", peptide_file=""):
+#     """ Process and populate pandas DataFrames with the data from 
+#     the DIA-NN 1.9 protein and peptide files, saving only the Protein.Names, 
+#     Precursor.Id (for peptide), Protein.Group (for protein), and the 
+#     file name columns. Also rename these columns.
+
+#     Parameters:
+#         protein_file (string): A pandas readable file with the protein data
+#         peptide_file (string): A pandas readable file with the peptide data
+
+#     Returns:
+#         prot_abundance (DataFrame): pandas DataFrame with protein data
+#             Column names: "Protein Name", "Accession", and the run names
+#         pep_abundance (DataFrame): pandas DataFrame with peptide data
+#             Column names: "Protein Name", "Sequence", and the run names
+
+#     Raises:
+#         FileNotFoundError: If protein_file or peptide_file does not exist
+#     """
+#     ## Verify that the files are valid ##
+#     try:
+#         protein_table = pd.read_table(protein_file, low_memory=False)
+#     except FileNotFoundError:
+#         print(f"Protein file '{protein_file}' does not exist.")
+#         raise FileNotFoundError(f"Protein file '{protein_file}' does not exist.")
+#     try:
+#         peptide_table = pd.read_table(peptide_file, low_memory=False)
+#     except FileNotFoundError:
+#         print(f"Peptide file '{peptide_file}' does not exist.")
+#         raise FileNotFoundError(f"Peptide file '{peptide_file}' does not exist.")
+    
+
+#     ## Create the base abundance table ##
+#     # Filters out proteins with "contam" or that are null
+#     peptide_table = peptide_table[~peptide_table['Protein.Group'].str.contains("contam", na=False)]
+#     protein_table = protein_table[~protein_table['Protein.Group'].str.contains("contam", na=False)]
+
+#     # Separate the columns of just the file names, 
+#     # "Precursor.Id" for peptides, "Protein.Group" for protein (these are unique), 
+#     # and "Protein.Names" (used to filter by organism)
+#     peptide_cols = peptide_table.filter(regex='\\\\|Precursor.Id|Protein.Names').columns
+#     protein_cols = protein_table.filter(regex="\\\\|Protein.Group|Protein.Names").columns
+
+#     # Create the abundance matrix
+#     pep_abundance = peptide_table.loc[:, peptide_cols]
+#     prot_abundance = protein_table.loc[:, protein_cols]
+
+
+#     ## Rename the columns ##
+#     # Create a list of just the full file path names
+#     full_pep_run_names = peptide_cols.drop(['Precursor.Id', 'Protein.Names']).to_list()
+#     full_prot_run_names = protein_cols.drop(['Protein.Group', 'Protein.Names']).to_list()
+
+#     # If .raw is in the file name, strip off everything after .raw.
+#     if ".raw" in full_pep_run_names[0]:
+#         run_names = [name.split(".raw")[0] for name in full_prot_run_names]
+#     else:
+#         run_names = [os.path.splitext(name)[0] for name in full_prot_run_names]
+
+#     # Create the renaming dictionary
+#     pep_rename_dict = dict(zip(full_pep_run_names, run_names))
+#     pep_rename_dict["Precursor.Id"] = "Sequence"
+#     pep_rename_dict["Protein.Names"] = "Protein Name"
+
+#     prot_rename_dict = dict(zip(full_prot_run_names, run_names))
+#     prot_rename_dict["Protein.Names"] = "Protein Name"
+#     prot_rename_dict["Protein.Group"] = "Accession"
+
+#     # Rename the file columns
+#     pep_abundance.rename(columns=pep_rename_dict, inplace=True)
+#     prot_abundance.rename(columns=prot_rename_dict, inplace=True)
+
+#     return prot_abundance, pep_abundance
+
+
+
+
+def diann_1_9_tables(file="", is_protein=True):
     """ Process and populate pandas DataFrames with the data from 
-    the DIA-NN 1.9 protein and peptide files, saving only the Protein.Names, 
-    Precursor.Id (for peptide), Protein.Group (for protein), and the 
-    file name columns. Also rename these columns.
+    the DIA-NN 1.9 files (protein or peptide), saving only certain columns
+
+    **Protein Columns**: Protein.Names, Protein.Group, file names     
+    **Peptide Columns**: Protein.Names, Precursor.Id, file names     
+   
+    Also rename these columns:
+
+    Protein.Names: Protein Name      
+    Protein.Group: Accession      
+    Precursor.Id: Sequence
 
     Parameters:
-        protein_file (string): A pandas readable file with the protein data
-        peptide_file (string): A pandas readable file with the peptide data
+        file (string):  A pandas readable file with the data      
+        
+        is_protein (bool):  True if protein file, False if peptide
 
     Returns:
-        prot_abundance (DataFrame): pandas DataFrame with protein data
-            Column names: "Protein Name", "Accession", and the run names
-        pep_abundance (DataFrame): pandas DataFrame with peptide data
-            Column names: "Protein Name", "Sequence", and the run names
+        abundance (DataFrame):  pandas DataFrame with filtered data 
 
     Raises:
-        FileNotFoundError: If protein_file or peptide_file does not exist
+        FileNotFoundError:  If protein_file or peptide_file does not exist
     """
     ## Verify that the files are valid ##
     try:
-        protein_table = pd.read_table(protein_file, low_memory=False)
+        df_table = pd.read_table(file, low_memory=False)
     except FileNotFoundError:
-        print(f"Protein file '{protein_file}' does not exist.")
-        raise FileNotFoundError(f"Protein file '{protein_file}' does not exist.")
-    try:
-        peptide_table = pd.read_table(peptide_file, low_memory=False)
-    except FileNotFoundError:
-        print(f"Peptide file '{peptide_file}' does not exist.")
-        raise FileNotFoundError(f"Peptide file '{peptide_file}' does not exist.")
+        print(f"File '{file}' does not exist.")
+        raise FileNotFoundError(f"File '{file}' does not exist.")
     
 
     ## Create the base abundance table ##
     # Filters out proteins with "contam" or that are null
-    peptide_table = peptide_table[~peptide_table['Protein.Group'].str.contains("contam", na=False)]
-    protein_table = protein_table[~protein_table['Protein.Group'].str.contains("contam", na=False)]
+    df_table = df_table[~df_table['Protein.Group'].str.contains("contam", na=False)]
 
     # Separate the columns of just the file names, 
     # "Precursor.Id" for peptides, "Protein.Group" for protein (these are unique), 
     # and "Protein.Names" (used to filter by organism)
-    peptide_cols = peptide_table.filter(regex='\\\\|Precursor.Id|Protein.Names').columns
-    protein_cols = protein_table.filter(regex="\\\\|Protein.Group|Protein.Names").columns
+    if is_protein:
+        col_names = df_table.filter(regex="\\\\|Protein.Group|Protein.Names").columns
+        identifier = "Protein.Group"
+        new_name = "Accession"
+    else:
+        col_names = df_table.filter(regex='\\\\|Precursor.Id|Protein.Names').columns
+        identifier = "Precursor.Id"
+        new_name = "Sequence"
 
     # Create the abundance matrix
-    pep_abundance = peptide_table.loc[:, peptide_cols]
-    prot_abundance = protein_table.loc[:, protein_cols]
+    abundance = df_table.loc[:, col_names]
 
 
     ## Rename the columns ##
     # Create a list of just the full file path names
-    full_pep_run_names = peptide_cols.drop(['Precursor.Id', 'Protein.Names']).to_list()
-    full_prot_run_names = protein_cols.drop(['Protein.Group', 'Protein.Names']).to_list()
+    run_names = col_names.drop([identifier, 'Protein.Names']).to_list()
 
     # If .raw is in the file name, strip off everything after .raw.
-    if ".raw" in full_pep_run_names[0]:
-        run_names = [name.split(".raw")[0] for name in full_prot_run_names]
+    if ".raw" in run_names[0]:
+        short_run_names = [name.split(".raw")[0] for name in run_names]
     else:
-        run_names = [os.path.splitext(name)[0] for name in full_prot_run_names]
+        short_run_names = [os.path.splitext(name)[0] for name in run_names]
 
     # Create the renaming dictionary
-    pep_rename_dict = dict(zip(full_pep_run_names, run_names))
-    pep_rename_dict["Precursor.Id"] = "Sequence"
-    pep_rename_dict["Protein.Names"] = "Protein Name"
-
-    prot_rename_dict = dict(zip(full_prot_run_names, run_names))
-    prot_rename_dict["Protein.Names"] = "Protein Name"
-    prot_rename_dict["Protein.Group"] = "Accession"
+    rename_dict = dict(zip(run_names, short_run_names))
+    rename_dict[identifier] = new_name
+    rename_dict["Protein.Names"] = "Protein Name"
 
     # Rename the file columns
-    pep_abundance.rename(columns=pep_rename_dict, inplace=True)
-    prot_abundance.rename(columns=prot_rename_dict, inplace=True)
+    abundance.rename(columns=rename_dict, inplace=True)
 
-    return prot_abundance, pep_abundance
+    return abundance
 
 
 
@@ -221,7 +296,10 @@ def read_file(protein_file="", peptide_file="", file_id=0,
 
     ## Create a pandas DataFrame for peptide and protein abundance ##
     if processing_app == "diann":
-        prot_abundance, pep_abundance = diann_1_9_tables(protein_file, peptide_file)
+        if protein_file:
+            prot_abundance = diann_1_9_tables(protein_file, is_protein=True)
+        if peptide_file:
+            pep_abundance = diann_1_9_tables(peptide_file, is_protein=False)
     
     elif processing_app == "fragpipe":
         prot_abundance, pep_abundance = fragpipe_22_tables(protein_file, peptide_file,

@@ -7,26 +7,28 @@
 
 # Use a '-' to start a new file group
 
-
-- peptide_file: input/fp_TK1005_combined_ion.tsv
-  protein_file: input/fp_TK1005_combined_protein.tsv
-  processing_app: fragpipe    # Options are diann or fragpipe
-
-
+# # Fragpipe files
 # # File 0
-# - peptide_file: input/dia_report.HYE_pr_matrix.tsv
-#   protein_file: input/dia_report.HYE_pg_matrix.tsv
-#   processing_app: diann    # Options are diann or fragpipe
+# - peptide_file: input/fp_TK1005_combined_ion.tsv
+#   protein_file: input/fp_TK1005_combined_protein.tsv
+#   processing_app: fragpipe    # Options are diann or fragpipe
 
-# # File 1
-# - peptide_file: input/dia_report.pr_matrix.tsv
-#   protein_file: input/dia_report.pg_matrix.tsv
-#   processing_app: diann    # Options are diann or fragpipe
 
-# # File 2
-# - peptide_file: input/dia_report.pr_matrix2.tsv
-#   protein_file: input/dia_report.pg_matrix2.tsv
-#   processing_app: diann    # Options are diann or fragpipe
+# # Diann files
+# File 0
+- peptide_file: input/dia_report.pr_matrix0.tsv
+  protein_file: input/dia_report.pg_matrix0.tsv
+  processing_app: diann    # Options are diann or fragpipe
+
+# File 1
+- peptide_file: input/dia_report.pr_matrix1.tsv
+  protein_file: input/dia_report.pg_matrix1.tsv
+  processing_app: diann    # Options are diann or fragpipe
+
+# File 2
+- peptide_file: input/dia_report.pr_matrix2.tsv
+  protein_file: input/dia_report.pg_matrix2.tsv
+  processing_app: diann    # Options are diann or fragpipe
 
 # # File 3
 # - peptide_file: input/dia_report.pr_matrix3.tsv
@@ -74,7 +76,7 @@
 #   processing_app: diann    # Options are diann or fragpipe
 
 # # File 12
-# - peptide_file: input/dia_report.pr_matrix12.tsv
-#   protein_file: input/dia_report.pg_matrix12.tsv
+# - peptide_file: input/dia_report.HYE_pr_matrix.tsv
+#   protein_file: input/dia_report.HYE_pg_matrix.tsv
 #   processing_app: diann    # Options are diann or fragpipe
 
