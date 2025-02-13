@@ -77,110 +77,6 @@ def diann_1_9_tables(file="", is_protein=True):
     return abundance
 
 
-
-
-# def fragpipe_22_tables(protein_file="", peptide_file="", 
-#                        min_unique_peptides=1, use_maxlfq=False):
-#     """ Process and populate pandas DataFrames with the data from the 
-#     FragPipe v22.0 protein and ion files, saving only the Entry Name, 
-#     Peptide Sequence (for peptide), Protein ID (for protein), and the 
-#     file name Intensity columns. Also rename these columns.
-
-#     Parameters:
-#         protein_file (string): A pandas readable file with the protein data
-#         peptide_file (string): A pandas readable file with the peptide data
-#             Should be the combined_ion.tsv file
-#         min_unique_peptides (int): The minimum number of unique peptides
-#         use_maxlfq (bool): Determines whether or not to use MaxLFQ Intensity
-#             Default: False (uses "Intensity" columns without MaxLFQ)
-
-#     Returns:
-#         prot_abundance (DataFrame): pandas DataFrame with protein data
-#             Column names: "Protein Name", "Accession", and the run names
-#         pep_abundance (DataFrame): pandas DataFrame with peptide data
-#             Column names: "Protein Name", "Sequence", and the run names
-
-#     Raises:
-#         FileNotFoundError: If protein_file or peptide_file does not exist
-#                            If not the combined_ion.tsv file
-#     """
-#     ## Verify that the files are valid ##
-#     try:
-#         protein_table = pd.read_table(protein_file, low_memory=False)
-#     except FileNotFoundError:
-#         print(f"Protein file '{protein_file}' does not exist.")
-#         raise FileNotFoundError(f"Protein file '{protein_file}' does not exist.")
-    
-#     try:
-#         peptide_table = pd.read_table(peptide_file, low_memory=False)
-#     except FileNotFoundError:
-#         print(f"Peptide file '{peptide_file}' does not exist.")
-#         raise FileNotFoundError(f"Peptide file '{peptide_file}' does not exist.")
-    
-#     if "M/Z" not in peptide_table:
-#         print(f"Peptide file must be the combined_ion.tsv file.")
-#         raise FileNotFoundError(f"Peptide file must be the combined_ion.tsv file.")
-    
-
-#     ## Create the base abundance table ##
-#     # Filters out proteins with "contam" or that are null
-#     peptide_table = peptide_table[~peptide_table['Protein'].str.contains("contam", na=False)]
-#     protein_table = protein_table[~protein_table['Protein'].str.contains("contam", na=False)]
-
-#     # Add the Charge number to the peptide sequence
-#     peptide_table["Modified Sequence"] = peptide_table["Modified Sequence"] + peptide_table["Charge"].astype(str)
-
-#     # Also filter out the proteins with total peptide count less than min_unique_peptides
-#     protein_table.query("`Combined Total Peptides` >= @min_unique_peptides", inplace=True)
-
-#     # Separate the columns of
-#     # "Peptide Sequence" (unique) for peptides, 
-#     # "Protein ID" (unique) for protein, and
-#     # "Entry Name" (used to filter by organism)
-#     peptide_cols = peptide_table.filter(regex='Modified Sequence|Entry Name').columns.to_list()
-#     protein_cols = protein_table.filter(regex="Protein ID|Entry Name").columns.to_list()
-
-#     # Include the MaxLFQ columns if requested, otherwise use the the Intensity columns
-#     # Always use the Intensity columns in the ion file
-#     if use_maxlfq is True:
-#         peptide_cols += (peptide_table.filter(regex='(?<!MaxLFQ) Intensity').columns.to_list())
-#         protein_cols += (protein_table.filter(regex=' MaxLFQ Intensity').columns.to_list())
-#     else:
-#         # The regex uses a negative lookbehind to ignore strings with 'MaxLFQ' 
-#         peptide_cols += (peptide_table.filter(regex='(?<!MaxLFQ) Intensity').columns.to_list())
-#         protein_cols += (protein_table.filter(regex='(?<!MaxLFQ) Intensity').columns.to_list())
-
-#     # Create the abundance matrix
-#     pep_abundance = peptide_table.loc[:, peptide_cols]
-#     prot_abundance = protein_table.loc[:, protein_cols]
-
-
-#     # ## Rename the columns ##
-#     # Remove the column names that are not run names 
-#     peptide_cols.remove('Modified Sequence')
-#     peptide_cols.remove('Entry Name')
-#     protein_cols.remove('Protein ID')
-#     protein_cols.remove('Entry Name')
-
-#     # Get just the run name (Assumes the run name has no spaces)
-#     run_names = [name.split(" ")[0] for name in peptide_cols]
-    
-#     # Create the renaming dictionary
-#     pep_rename_dict = dict(zip(peptide_cols, run_names))
-#     pep_rename_dict["Modified Sequence"] = "Sequence"
-#     pep_rename_dict["Entry Name"] = "Protein Name"
-#     prot_rename_dict = dict(zip(protein_cols, run_names))
-#     prot_rename_dict["Entry Name"] = "Protein Name"
-#     prot_rename_dict["Protein ID"] = "Accession"
-
-#     # Rename the file columns
-#     pep_abundance.rename(columns=pep_rename_dict, inplace=True)
-#     prot_abundance.rename(columns=prot_rename_dict, inplace=True)
-
-#     return prot_abundance, pep_abundance
-
-
-
 def fragpipe_22_tables(file="", is_protein=True, 
                        min_unique_peptides=1, use_maxlfq=False):
     """ Process and populate pandas DataFrames with the data from the 
@@ -331,7 +227,7 @@ def read_file(protein_file="", peptide_file="", file_id=0,
                                                 use_maxlfq, is_protein=True)
         if peptide_file:
             pep_abundance = fragpipe_22_tables(peptide_file, is_protein=True)
-            
+
     
     ## Rename the DataFrames with run_IDs ##
     # Create a list of the run_IDs
