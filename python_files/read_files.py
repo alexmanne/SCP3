@@ -199,7 +199,8 @@ def fragpipe_22_tables(file="", is_protein=True,
         is_protein (bool): True if protein file, False if peptide
         min_unique_peptides (int): The minimum number of unique peptides
         use_maxlfq (bool): Determines whether or not to use MaxLFQ Intensity     
-            Default: False (uses "Intensity" columns without MaxLFQ)
+            Default: False (uses "Intensity" columns without MaxLFQ)     
+            Only supported on Protein files
 
     Returns:
         abundance (DataFrame): pandas DataFrame with the filtered data
@@ -208,8 +209,6 @@ def fragpipe_22_tables(file="", is_protein=True,
         FileNotFoundError: If file does not exist     
                            If not the combined_ion.tsv file
     """
-    fragpipe_22_tables
-
     ## Verify that the files are valid ##
     try:
         df_table = pd.read_table(file, low_memory=False)
@@ -226,58 +225,61 @@ def fragpipe_22_tables(file="", is_protein=True,
     # Filters out proteins with "contam" or that are null
     df_table = df_table[~df_table['Protein'].str.contains("contam", na=False)]
 
-    # Add the Charge number to the peptide sequence
-    if not is_protein:
-        df_table["Modified Sequence"] = df_table["Modified Sequence"] + df_table["Charge"].astype(str)
-
-    # Also filter out the proteins with total peptide count less than min_unique_peptides
-    protein_table.query("`Combined Total Peptides` >= @min_unique_peptides", inplace=True)
-
     # Separate the columns of
     # "Peptide Sequence" (unique) for peptides, 
     # "Protein ID" (unique) for protein, and
     # "Entry Name" (used to filter by organism)
-    peptide_cols = peptide_table.filter(regex='Modified Sequence|Entry Name').columns.to_list()
-    protein_cols = protein_table.filter(regex="Protein ID|Entry Name").columns.to_list()
 
-    # Include the MaxLFQ columns if requested, otherwise use the the Intensity columns
-    # Always use the Intensity columns in the ion file
-    if use_maxlfq is True:
-        peptide_cols += (peptide_table.filter(regex='(?<!MaxLFQ) Intensity').columns.to_list())
-        protein_cols += (protein_table.filter(regex=' MaxLFQ Intensity').columns.to_list())
+    # Edit the table and save the protein specific values
+    if is_protein:
+
+        # Filter out the proteins with total peptide count less than min_unique_peptides
+        df_table.query("`Combined Total Peptides` >= @min_unique_peptides", inplace=True)
+
+        # Get the column names
+        col_names = df_table.filter(regex="Protein ID|Entry Name").columns.to_list()
+
+        # Add the Intensity columns (depending on use_maxlfq)
+        if use_maxlfq is True:
+            col_names += (df_table.filter(regex=' MaxLFQ Intensity').columns.to_list())
+        else:
+            col_names += (df_table.filter(regex='(?<!MaxLFQ) Intensity').columns.to_list())
+
+        # Save these values for later
+        identifier = "Protein ID"
+        new_name = "Accession"
+
+    # Edit the table and save the peptide specific values
     else:
-        # The regex uses a negative lookbehind to ignore strings with 'MaxLFQ' 
-        peptide_cols += (peptide_table.filter(regex='(?<!MaxLFQ) Intensity').columns.to_list())
-        protein_cols += (protein_table.filter(regex='(?<!MaxLFQ) Intensity').columns.to_list())
+        # Add the Charge number to the peptide sequence
+        df_table["Modified Sequence"] = df_table["Modified Sequence"] + df_table["Charge"].astype(str)
+        col_names = df_table.filter(regex='Modified Sequence|Entry Name|(?<!MaxLFQ) Intensity').columns.to_list()
 
-    # Create the abundance matrix
-    pep_abundance = peptide_table.loc[:, peptide_cols]
-    prot_abundance = protein_table.loc[:, protein_cols]
+        # Save these values for later
+        identifier = 'Modified Sequence'
+        new_name = "Sequence"
+
+    # Create the abundance data frame
+    abundance = df_table.loc[:, col_names]
 
 
     # ## Rename the columns ##
     # Remove the column names that are not run names 
-    peptide_cols.remove('Modified Sequence')
-    peptide_cols.remove('Entry Name')
-    protein_cols.remove('Protein ID')
-    protein_cols.remove('Entry Name')
+    col_names.remove(identifier)
+    col_names.remove('Entry Name')
 
     # Get just the run name (Assumes the run name has no spaces)
-    run_names = [name.split(" ")[0] for name in peptide_cols]
+    run_names = [name.split(" ")[0] for name in col_names]
     
     # Create the renaming dictionary
-    pep_rename_dict = dict(zip(peptide_cols, run_names))
-    pep_rename_dict["Modified Sequence"] = "Sequence"
-    pep_rename_dict["Entry Name"] = "Protein Name"
-    prot_rename_dict = dict(zip(protein_cols, run_names))
-    prot_rename_dict["Entry Name"] = "Protein Name"
-    prot_rename_dict["Protein ID"] = "Accession"
+    rename_dict = dict(zip(col_names, run_names))
+    rename_dict[identifier] = new_name
+    rename_dict["Entry Name"] = "Protein Name"
 
     # Rename the file columns
-    pep_abundance.rename(columns=pep_rename_dict, inplace=True)
-    prot_abundance.rename(columns=prot_rename_dict, inplace=True)
+    abundance.rename(columns=rename_dict, inplace=True)
 
-    return prot_abundance, pep_abundance
+    return abundance
 
 
 
@@ -324,8 +326,12 @@ def read_file(protein_file="", peptide_file="", file_id=0,
             pep_abundance = diann_1_9_tables(peptide_file, is_protein=False)
     
     elif processing_app == "fragpipe":
-        prot_abundance, pep_abundance = fragpipe_22_tables(protein_file, peptide_file,
-                                                           min_unique_peptides, use_maxlfq)
+        if protein_file:
+            prot_abundance = fragpipe_22_tables(protein_file, min_unique_peptides, 
+                                                use_maxlfq, is_protein=True)
+        if peptide_file:
+            pep_abundance = fragpipe_22_tables(peptide_file, is_protein=True)
+            
     
     ## Rename the DataFrames with run_IDs ##
     # Create a list of the run_IDs
