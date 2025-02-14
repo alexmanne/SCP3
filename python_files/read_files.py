@@ -178,9 +178,6 @@ def fragpipe_22_tables(file="", is_protein=True,
     return abundance
 
 
-
-
-
 def read_file(protein_file="", peptide_file="", file_id=0, 
               processing_app='', min_unique_peptides=1, use_maxlfq=False):
     """ Process and populate pandas DataFrames with the data from 
@@ -215,6 +212,9 @@ def read_file(protein_file="", peptide_file="", file_id=0,
     
 
     ## Create a pandas DataFrame for peptide and protein abundance ##
+    prot_abundance = pd.DataFrame()
+    pep_abundance = pd.DataFrame()
+
     if processing_app == "diann":
         if protein_file:
             prot_abundance = diann_1_9_tables(protein_file, is_protein=True)
@@ -223,15 +223,20 @@ def read_file(protein_file="", peptide_file="", file_id=0,
     
     elif processing_app == "fragpipe":
         if protein_file:
-            prot_abundance = fragpipe_22_tables(protein_file, min_unique_peptides, 
-                                                use_maxlfq, is_protein=True)
+            prot_abundance = fragpipe_22_tables(protein_file, is_protein=True, 
+                                                min_unique_peptides=min_unique_peptides, 
+                                                use_maxlfq=use_maxlfq)
         if peptide_file:
-            pep_abundance = fragpipe_22_tables(peptide_file, is_protein=True)
+            pep_abundance = fragpipe_22_tables(peptide_file, is_protein=False)
 
     
     ## Rename the DataFrames with run_IDs ##
-    # Create a list of the run_IDs
-    run_names = pep_abundance.columns.drop(["Sequence", "Protein Name"]).to_list()
+    # Create a list of the run_names using pep_abundance by default
+    if not pep_abundance.empty:
+        run_names = pep_abundance.columns.drop(["Sequence", "Protein Name"]).to_list()
+    else:
+        run_names = prot_abundance.columns.drop(["Accession", "Protein Name"]).to_list()
+    
     num_files = len(run_names)
     ID_generator = lambda x: str(file_id) + "-" + str(x)
     run_IDs = [ID_generator(i) for i in range(num_files)]
@@ -241,11 +246,10 @@ def read_file(protein_file="", peptide_file="", file_id=0,
                                 "run_ID": np.array(run_IDs)})
 
     # Create a dictionary key run_name and value run_ID
-    pep_rename_dict = dict(zip(run_names, run_IDs))
-    prot_rename_dict = dict(zip(run_names, run_IDs))
+    rename_dict = dict(zip(run_names, run_IDs))
 
-    pep_abundance.rename(columns=pep_rename_dict, inplace=True)
-    prot_abundance.rename(columns=prot_rename_dict, inplace=True)
+    pep_abundance.rename(columns=rename_dict, inplace=True)
+    prot_abundance.rename(columns=rename_dict, inplace=True)
     
     return {"run_metadata": run_metadata,
             "pep_abundance": pep_abundance, 
