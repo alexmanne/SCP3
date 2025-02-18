@@ -11,47 +11,47 @@
 # File 0
 - peptide_file: input/fp_TK1005_combined_ion.tsv
   protein_file: input/fp_TK1005_combined_protein.tsv
-  processing_app: fragpipe    # Options are diann or fragpipe
+  processing_app: fragpipe    # Options: diann, fragpipe
 
-# # File 1
+# # File 1     # Broken for some reason
 # - peptide_file: input/fp_combined_ion1.tsv
 #   protein_file: input/fp_combined_protein1.tsv
-#   processing_app: fragpipe    # Options are diann or fragpipe
+#   processing_app: fragpipe    # Options: diann, fragpipe
 
-# # File 2
-# - peptide_file: input/fp_combined_ion2.tsv
-#   protein_file: input/fp_combined_protein2.tsv
-#   processing_app: fragpipe    # Options are diann or fragpipe
+# File 2
+- peptide_file: input/fp_combined_ion2.tsv
+  protein_file: input/fp_combined_protein2.tsv
+  processing_app: fragpipe    # Options: diann, fragpipe
 
-# # File 3
-# - peptide_file: input/fp_combined_ion3.tsv
-#   protein_file: input/fp_combined_protein3.tsv
-#   processing_app: fragpipe    # Options are diann or fragpipe
+# File 3
+- peptide_file: input/fp_combined_ion3.tsv
+  protein_file: input/fp_combined_protein3.tsv
+  processing_app: fragpipe    # Options: diann, fragpipe
 
-# # File 4
-# - peptide_file: input/fp_combined_ion4.tsv
-#   protein_file: input/fp_combined_protein4.tsv
-#   processing_app: fragpipe    # Options are diann or fragpipe
+# File 4
+- peptide_file: input/fp_combined_ion4.tsv
+  protein_file: input/fp_combined_protein4.tsv
+  processing_app: fragpipe    # Options: diann, fragpipe
 
-# # File 5
-# - peptide_file: input/fp_combined_ion5.tsv
-#   protein_file: input/fp_combined_protein5.tsv
-#   processing_app: fragpipe    # Options are diann or fragpipe
+# File 5
+- peptide_file: input/fp_combined_ion5.tsv
+  protein_file: input/fp_combined_protein5.tsv
+  processing_app: fragpipe    # Options: diann, fragpipe
 
-# # File 6
-# - peptide_file: input/fp_combined_ion6.tsv
-#   protein_file: input/fp_combined_protein6.tsv
-#   processing_app: fragpipe    # Options are diann or fragpipe
+# File 6
+- peptide_file: input/fp_combined_ion6.tsv
+  protein_file: input/fp_combined_protein6.tsv
+  processing_app: fragpipe    # Options: diann, fragpipe
 
-# # File 7
-# - peptide_file: input/fp_combined_ion7.tsv
-#   protein_file: input/fp_combined_protein7.tsv
-#   processing_app: fragpipe    # Options are diann or fragpipe
+# File 7
+- peptide_file: input/fp_combined_ion7.tsv
+  protein_file: input/fp_combined_protein7.tsv
+  processing_app: fragpipe    # Options: diann, fragpipe
 
-# # File 8
-# - peptide_file: input/fp_combined_ion8.tsv
-#   protein_file: input/fp_combined_protein8.tsv
-#   processing_app: fragpipe    # Options are diann or fragpipe
+# File 8
+- peptide_file: input/fp_combined_ion8.tsv
+  protein_file: input/fp_combined_protein8.tsv
+  processing_app: fragpipe    # Options: diann, fragpipe
 
 
 
@@ -61,65 +61,65 @@
 # # File 0
 # - peptide_file: input/dia_report.pr_matrix0.tsv
 #   protein_file: input/dia_report.pg_matrix0.tsv
-#   processing_app: diann    # Options are diann or fragpipe
+#   processing_app: diann    # Options: diann, fragpipe
 
 # # File 1
 # - peptide_file: input/dia_report.pr_matrix1.tsv
 #   protein_file: input/dia_report.pg_matrix1.tsv
-#   processing_app: diann    # Options are diann or fragpipe
+#   processing_app: diann    # Options: diann, fragpipe
 
 # # File 2
 # - peptide_file: input/dia_report.pr_matrix2.tsv
 #   protein_file: input/dia_report.pg_matrix2.tsv
-#   processing_app: diann    # Options are diann or fragpipe
+#   processing_app: diann    # Options: diann, fragpipe
 
 # # File 3
 # - peptide_file: input/dia_report.pr_matrix3.tsv
 #   protein_file: input/dia_report.pg_matrix3.tsv
-#   processing_app: diann    # Options are diann or fragpipe
+#   processing_app: diann    # Options: diann, fragpipe
 
 # # File 4
 # - peptide_file: input/dia_report.pr_matrix4.tsv
 #   protein_file: input/dia_report.pg_matrix4.tsv
-#   processing_app: diann    # Options are diann or fragpipe
+#   processing_app: diann    # Options: diann, fragpipe
 
 # # File 5
 # - peptide_file: input/dia_report.pr_matrix5.tsv
 #   protein_file: input/dia_report.pg_matrix5.tsv
-#   processing_app: diann    # Options are diann or fragpipe
+#   processing_app: diann    # Options: diann, fragpipe
 
 # # File 6
 # - peptide_file: input/dia_report.pr_matrix6.tsv
 #   protein_file: input/dia_report.pg_matrix6.tsv
-#   processing_app: diann    # Options are diann or fragpipe
+#   processing_app: diann    # Options: diann, fragpipe
 
 # # File 7
 # - peptide_file: input/dia_report.pr_matrix7.tsv
 #   protein_file: input/dia_report.pg_matrix7.tsv
-#   processing_app: diann    # Options are diann or fragpipe
+#   processing_app: diann    # Options: diann, fragpipe
 
 # # File 8
 # - peptide_file: input/dia_report.pr_matrix8.tsv
 #   protein_file: input/dia_report.pg_matrix8.tsv
-#   processing_app: diann    # Options are diann or fragpipe
+#   processing_app: diann    # Options: diann, fragpipe
 
 # # File 9
 # - peptide_file: input/dia_report.pr_matrix9.tsv
 #   protein_file: input/dia_report.pg_matrix9.tsv
-#   processing_app: diann    # Options are diann or fragpipe
+#   processing_app: diann    # Options: diann, fragpipe
 
 # # File 10
 # - peptide_file: input/dia_report.pr_matrix10.tsv
 #   protein_file: input/dia_report.pg_matrix10.tsv
-#   processing_app: diann    # Options are diann or fragpipe
+#   processing_app: diann    # Options: diann, fragpipe
 
 # # File 11
 # - peptide_file: input/dia_report.pr_matrix11.tsv
 #   protein_file: input/dia_report.pg_matrix11.tsv
-#   processing_app: diann    # Options are diann or fragpipe
+#   processing_app: diann    # Options: diann, fragpipe
 
 # # File 12
 # - peptide_file: input/dia_report.HYE_pr_matrix.tsv
 #   protein_file: input/dia_report.HYE_pg_matrix.tsv
-#   processing_app: diann    # Options are diann or fragpipe
+#   processing_app: diann    # Options: diann, fragpipe
 

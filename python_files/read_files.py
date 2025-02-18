@@ -95,8 +95,8 @@ def fragpipe_22_tables(file="", is_protein=True,
         is_protein (bool): True if protein file, False if peptide
         min_unique_peptides (int): The minimum number of unique peptides
         use_maxlfq (bool): Determines whether or not to use MaxLFQ Intensity     
-            Default: False (uses "Intensity" columns without MaxLFQ)     
-            Only supported on Protein files
+            - Default: False (uses "Intensity" columns without MaxLFQ)     
+            - Only supported on Protein files
 
     Returns:
         abundance (DataFrame): pandas DataFrame with the filtered data
@@ -181,7 +181,7 @@ def fragpipe_22_tables(file="", is_protein=True,
 def read_file(protein_file="", peptide_file="", file_id=0, 
               processing_app='', min_unique_peptides=1, use_maxlfq=False):
     """ Process and populate pandas DataFrames with the data from 
-    the protein and peptide files, saving only the Organism, 
+    the protein and peptide files, saving only the Protein Name, 
     Sequence (for peptide), Accession (for protein), and the 
     file name columns. Also rename the run names with a run ID,
     and save this information
@@ -190,18 +190,18 @@ def read_file(protein_file="", peptide_file="", file_id=0,
         protein_file (string): A pandas readable file with the protein data
         peptide_file (string): A pandas readable file with the peptide data
         file_id (int): The number denoting the group in the run ID
-        processing_app (string): Denotes the application used for processing
+        processing_app (string): Denotes the application used for processing     
             Currently supports: "diann", "fragpipe"
         min_unique_peptides (int): The minimum number of unique peptides (used in FragPipe)
 
     Returns:
-        data_obj (dict): A dictionary with the following keys/values
-            "run_metadata": A pandas DataFrame mapping run names to ids
-            "pep_abundance": A pandas DataFrame with peptide data
-            "prot_abundance": A pandas DataFrame with protein data
+        data_obj (dict): A dictionary with the following keys/values    
+            "run_metadata": A pandas DataFrame mapping run names to ids    
+            "pep_abundance": A pandas DataFrame with peptide data    
+            "prot_abundance": A pandas DataFrame with protein data    
     
     Raises:
-        ValueError: If the processing app is not accepted
+        ValueError: If the processing app is not accepted     
         FileNotFoundError: If protein_file or peptide_file does not exist
     """
     ## Verify the processing application ##
@@ -257,22 +257,21 @@ def read_file(protein_file="", peptide_file="", file_id=0,
 
 
 
-
 def group_data(data_objects):
     """ Take the list of data objects and combine them into one.
 
     Parameters:
-        data_objects (list): A list of dictionaries that contain the data 
-            objects to combine. Each data object has the following keys/values
-                "run_metadata": A pandas DataFrame mapping run names to ids
-                "pep_abundance": A pandas DataFrame with peptide data
-                "prot_abundance": A pandas DataFrame with protein data
+        data_objects (list): A list of dictionaries that contain the data
+            objects to combine. Each data object has the following keys/values     
+                "run_metadata": A pandas DataFrame mapping run names to ids    
+                "pep_abundance": A pandas DataFrame with peptide data     
+                "prot_abundance": A pandas DataFrame with protein data     
 
     Returns:
-        data_obj (dict): A dictionary with the following keys/values
-            "run_metadata": A pandas DataFrame mapping run names to ids
-            "pep_abundance": A pandas DataFrame with peptide data
-            "prot_abundance": A pandas DataFrame with protein data
+        data_obj (dict): A dictionary with the following keys/values    
+            "run_metadata": A pandas DataFrame mapping run names to ids    
+            "pep_abundance": A pandas DataFrame with peptide data     
+            "prot_abundance": A pandas DataFrame with protein data    
     
     Raises:
         KeyError: If one of the keys is missing from a data object
@@ -300,15 +299,17 @@ def group_data(data_objects):
                                                         data_obj["run_metadata"]])
             final_data_obj["run_metadata"].reset_index(drop=True, inplace=True)
 
-            # Outer join the peptide matrices on the Sequence column
-            final_data_obj["pep_abundance"] = pd.merge(final_data_obj["pep_abundance"], 
-                                                       data_obj["pep_abundance"],
-                                                       how="outer", on=["Sequence", "Protein Name"])
-            
-            # Outer join the protein matrices on the Accession column
-            final_data_obj["prot_abundance"] = pd.merge(final_data_obj["prot_abundance"], 
-                                                       data_obj["prot_abundance"],
-                                                       how="outer", on=["Accession", "Protein Name"])
+            # Outer join the peptide matrices on the Sequence column if it is not empty
+            if not data_obj["pep_abundance"].empty:
+                final_data_obj["pep_abundance"] = pd.merge(final_data_obj["pep_abundance"], 
+                                                           data_obj["pep_abundance"],
+                                                           how="outer", on=["Sequence", "Protein Name"])
+                
+            # Outer join the protein matrices on the Accession column if it is not empty
+            if not data_obj["prot_abundance"].empty:
+                final_data_obj["prot_abundance"] = pd.merge(final_data_obj["prot_abundance"], 
+                                                            data_obj["prot_abundance"],
+                                                            how="outer", on=["Accession", "Protein Name"])
             
         i += 1
 
@@ -320,12 +321,10 @@ def group_data(data_objects):
 
 
 
-
-
 def read_files(yaml_file):
     """ Read in the combined data from multiple runs. Call read_file 
     to process and populate pandas DataFrames with the data, saving 
-    only the Organism, Peptide Sequence (for peptide), Protein ID 
+    only the Protein Name, Peptide Sequence (for peptide), Protein ID 
     (for protein), and the file name columns. Also call group_data to 
     combine the data into one data object.
 
@@ -334,15 +333,15 @@ def read_files(yaml_file):
             containing the names of peptide/protein files
 
     Returns:
-        data_obj (dict): A dictionary with the following keys/values
-            "run_metadata": A pandas DataFrame mapping run names to ids
-            "pep_abundance": A pandas DataFrame with peptide data
-            "prot_abundance": A pandas DataFrame with protein data
+        data_obj (dict): A dictionary with the following keys/values     
+            "run_metadata": A pandas DataFrame mapping run names to ids     
+            "pep_abundance": A pandas DataFrame with peptide data     
+            "prot_abundance": A pandas DataFrame with protein data     
     
     Raises:
-        ValueError: If the processing app is not accepted
-                    If the dictionary is not correct
-        FileNotFoundError: If the yaml_file, protein_file, or 
+        ValueError: If the processing app is not accepted    
+                    If the dictionary is not correct    
+        FileNotFoundError: If the yaml_file, protein_file, or
                     peptide_file do not exist
     """
     ## Verify that the file is valid ##
@@ -350,8 +349,8 @@ def read_files(yaml_file):
         with open(yaml_file, "r") as f:
             filelist = yaml.safe_load(f)
     except FileNotFoundError:
-        print(f"Protein file '{yaml_file}' does not exist.")
-        raise FileNotFoundError(f"Protein file '{yaml_file}' does not exist.")
+        print(f"File '{yaml_file}' does not exist.")
+        raise FileNotFoundError(f"File '{yaml_file}' does not exist.")
 
     # Initiate the data_objects list
     data_objects = []
