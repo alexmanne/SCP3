@@ -321,7 +321,7 @@ def group_data(data_objects):
 
 
 
-def read_files(yaml_file):
+def read_files(yaml_file, settings):
     """ Read in the combined data from multiple runs. Call read_file 
     to process and populate pandas DataFrames with the data, saving 
     only the Protein Name, Peptide Sequence (for peptide), Protein ID 
@@ -330,7 +330,9 @@ def read_files(yaml_file):
 
     Parameters:
         yaml_file (string): A string with the name of the yaml file
-            containing the names of peptide/protein files
+            containing the names of peptide/protein files    
+        settings (dict): A dictionary containing the settings from the      
+            settings file
 
     Returns:
         data_obj (dict): A dictionary with the following keys/values     
@@ -351,6 +353,11 @@ def read_files(yaml_file):
     except FileNotFoundError:
         print(f"File '{yaml_file}' does not exist.")
         raise FileNotFoundError(f"File '{yaml_file}' does not exist.")
+    
+    # Set the min_unique_peptides
+    min_unique_peptides = settings["filters"]["min_peptides"]
+    ## currently set use_maxlfq to False. Can be changed with settings
+    use_maxlfq = settings["filters"]["use_maxlfq"]
 
     # Initiate the data_objects list
     data_objects = []
@@ -369,12 +376,6 @@ def read_files(yaml_file):
         if "processing_app" not in file_dict:
             print('yaml syntax incorrect. Must include "processing_app".')
             raise ValueError('yaml syntax incorrect. Must include "processing_app".')
-        
-    
-        ## currently set min peptides to 1. Can be changed with settings
-        min_unique_peptides = 5
-        ## currently set use_maxlfq to False. Can be changed with settings
-        use_maxlfq = False
 
         # Read the file and append it to data_objects
         data_obj = read_file(protein_file=file_dict["protein_file"], 

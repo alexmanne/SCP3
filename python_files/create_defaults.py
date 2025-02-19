@@ -78,6 +78,7 @@ filters:
   min_confidence_score: 0.95
   min_peptide_length: 7
   max_missing_values: 0.5
+  use_maxlfq: False
 
 # Normalization Options
 normalization:
