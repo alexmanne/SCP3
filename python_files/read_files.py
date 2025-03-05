@@ -5,7 +5,6 @@ import yaml
 from time import time
 
 
-
 def diann_1_9_tables(file="", is_protein=True):
     """ Process and populate pandas DataFrames with the data from 
     the DIA-NN 1.9 files (protein or peptide), saving only certain columns.
@@ -195,7 +194,7 @@ def read_file(protein_file="", peptide_file="", file_id=0,
         min_unique_peptides (int): The minimum number of unique peptides (used in FragPipe)
 
     Returns:
-        data_obj (dict): A dictionary with the following keys/values    
+        abundance_df_dict (dict): A dictionary with the following keys/values    
             "run_metadata": A pandas DataFrame mapping run names to ids    
             "pep_abundance": A pandas DataFrame with peptide data    
             "prot_abundance": A pandas DataFrame with protein data    
@@ -257,18 +256,18 @@ def read_file(protein_file="", peptide_file="", file_id=0,
 
 
 
-def group_data(data_objects):
+def group_data(abundance_df_dicts):
     """ Take the list of data objects and combine them into one.
 
     Parameters:
-        data_objects (list): A list of dictionaries that contain the data
+        abundance_df_dicts (list): A list of dictionaries that contain the data
             objects to combine. Each data object has the following keys/values     
                 "run_metadata": A pandas DataFrame mapping run names to ids    
                 "pep_abundance": A pandas DataFrame with peptide data     
                 "prot_abundance": A pandas DataFrame with protein data     
 
     Returns:
-        data_obj (dict): A dictionary with the following keys/values    
+        abundance_df_dict (dict): A dictionary with the following keys/values    
             "run_metadata": A pandas DataFrame mapping run names to ids    
             "pep_abundance": A pandas DataFrame with peptide data     
             "prot_abundance": A pandas DataFrame with protein data    
@@ -280,44 +279,44 @@ def group_data(data_objects):
     # Initialize a counter for error catching
     i = 0
 
-    for data_obj in data_objects:
+    for abundance_df_dict in abundance_df_dicts:
 
         # Verify the keys are what we want them to be
-        for key in data_obj.keys():
+        for key in abundance_df_dict.keys():
             if key not in ["run_metadata", "pep_abundance", "prot_abundance"]:
                 print(f"{key} not found in the {i} data object")
                 raise KeyError(f"{key} not found in the {i} data object")
             
         # Initialize the final data object if it is the first one. (if i==0)
         if i == 0:
-            final_data_obj = data_obj
+            final_dict = abundance_df_dict
 
         # append the information to the final_data_object for the rest
         else:
             # Concatenate the run metadata and reset the index
-            final_data_obj["run_metadata"] = pd.concat([final_data_obj["run_metadata"], 
-                                                        data_obj["run_metadata"]])
-            final_data_obj["run_metadata"].reset_index(drop=True, inplace=True)
+            final_dict["run_metadata"] = pd.concat([final_dict["run_metadata"], 
+                                                    abundance_df_dict["run_metadata"]])
+            final_dict["run_metadata"].reset_index(drop=True, inplace=True)
 
             # Outer join the peptide matrices on the Sequence column if it is not empty
-            if not data_obj["pep_abundance"].empty:
-                final_data_obj["pep_abundance"] = pd.merge(final_data_obj["pep_abundance"], 
-                                                           data_obj["pep_abundance"],
-                                                           how="outer", on=["Sequence", "Protein Name"])
+            if not abundance_df_dict["pep_abundance"].empty:
+                final_dict["pep_abundance"] = pd.merge(final_dict["pep_abundance"], 
+                                                       abundance_df_dict["pep_abundance"],
+                                                       how="outer", on=["Sequence", "Protein Name"])
                 
             # Outer join the protein matrices on the Accession column if it is not empty
-            if not data_obj["prot_abundance"].empty:
-                final_data_obj["prot_abundance"] = pd.merge(final_data_obj["prot_abundance"], 
-                                                            data_obj["prot_abundance"],
-                                                            how="outer", on=["Accession", "Protein Name"])
+            if not abundance_df_dict["prot_abundance"].empty:
+                final_dict["prot_abundance"] = pd.merge(final_dict["prot_abundance"], 
+                                                        abundance_df_dict["prot_abundance"],
+                                                        how="outer", on=["Accession", "Protein Name"])
             
         i += 1
 
      # Replace 0 values with nan to decrease complexity
-    final_data_obj["pep_abundance"].replace(0, np.nan, inplace=True)
-    final_data_obj["prot_abundance"].replace(0, np.nan, inplace=True)
+    final_dict["pep_abundance"].replace(0, np.nan, inplace=True)
+    final_dict["prot_abundance"].replace(0, np.nan, inplace=True)
 
-    return final_data_obj
+    return final_dict
 
 
 
@@ -335,7 +334,7 @@ def read_files(yaml_file, settings):
             settings file
 
     Returns:
-        data_obj (dict): A dictionary with the following keys/values     
+        abundance_df_dict (dict): A dictionary with the following keys/values     
             "run_metadata": A pandas DataFrame mapping run names to ids     
             "pep_abundance": A pandas DataFrame with peptide data     
             "prot_abundance": A pandas DataFrame with protein data     
@@ -356,11 +355,11 @@ def read_files(yaml_file, settings):
     
     # Set the min_unique_peptides
     min_unique_peptides = settings["filters"]["min_peptides"]
-    ## currently set use_maxlfq to False. Can be changed with settings
+    # Determine if we are to use_maxlfq
     use_maxlfq = settings["filters"]["use_maxlfq"]
 
-    # Initiate the data_objects list
-    data_objects = []
+    # Initiate the dictionary of abundance_dfs list
+    abundance_df_dicts = []
 
     # Initiate i as a file_id counter
     i = 0
@@ -377,19 +376,19 @@ def read_files(yaml_file, settings):
             print('yaml syntax incorrect. Must include "processing_app".')
             raise ValueError('yaml syntax incorrect. Must include "processing_app".')
 
-        # Read the file and append it to data_objects
-        data_obj = read_file(protein_file=file_dict["protein_file"], 
-                             peptide_file=file_dict["peptide_file"], 
-                             file_id=i, 
-                             processing_app= file_dict["processing_app"],
-                             min_unique_peptides=min_unique_peptides,
-                             use_maxlfq=use_maxlfq)
+        # Read the file and append it to abundance_df_dicts
+        abundance_df_dict = read_file(protein_file=file_dict["protein_file"], 
+                                      peptide_file=file_dict["peptide_file"], 
+                                      file_id=i, 
+                                      processing_app= file_dict["processing_app"],
+                                      min_unique_peptides=min_unique_peptides,
+                                      use_maxlfq=use_maxlfq)
         
-        data_objects.append(data_obj)
+        abundance_df_dicts.append(abundance_df_dict)
         i += 1
 
-    # Call group data to put all of the data into one data object
-    return group_data(data_objects)
+    # Call group data to put all of the data into one dictionary
+    return group_data(abundance_df_dicts)
         
 
 

@@ -13,11 +13,6 @@
   protein_file: input/fp_TK1005_combined_protein.tsv
   processing_app: fragpipe    # Options: diann, fragpipe
 
-# # File 1     # Broken for some reason
-# - peptide_file: input/fp_combined_ion1.tsv
-#   protein_file: input/fp_combined_protein1.tsv
-#   processing_app: fragpipe    # Options: diann, fragpipe
-
 # File 2
 - peptide_file: input/fp_combined_ion2.tsv
   protein_file: input/fp_combined_protein2.tsv

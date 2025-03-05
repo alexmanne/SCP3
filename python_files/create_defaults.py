@@ -1,5 +1,4 @@
 
-
 def generate_input_files_template(n):
     """ Writes a yaml file with empty values for n files.
 
