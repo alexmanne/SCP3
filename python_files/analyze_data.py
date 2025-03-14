@@ -3,9 +3,10 @@ def analyze_data(data_obj, settings):
     """ Compute the statistical analysis of the objects in data_obj 
     based on the settings. Executes the following analyses.
 
+    - Filter by Condition
     - Filter by Missing Value
+    - Filter by Unique Peptide (Happens in read_files)
     - Normalize to Median
-    - Imputation
 
     Parameters:
         data_obj (list): A list of dictionaries that contain the data objects 
