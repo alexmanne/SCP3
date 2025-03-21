@@ -19,7 +19,7 @@ def generate_input_files_template(n):
     
     data = ("- peptide_file: input/PUT FILE NAME HERE\n"
             "  protein_file: input/PUT FILE NAME HERE\n"
-            "  processing_app: diann    # Options: diann, fragpipe\n")
+            "  processing_app: diann    # Options: diann, fragpipe, spectronaut\n")
 
     # Use a Try except block to signify if the file already exists
     try:

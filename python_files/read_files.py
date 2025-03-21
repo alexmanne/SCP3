@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 import os
 import yaml
-from time import time
 
 
 def diann_1_9_tables(file="", is_protein=True):
@@ -177,6 +176,77 @@ def fragpipe_22_tables(file="", is_protein=True,
     return abundance
 
 
+def spectronaut_19_tables(file="", is_protein=True):
+    """ Process and populate pandas DataFrames with the data from 
+    the Spectronaut 19 files (protein or peptide), saving only certain columns.
+
+    **Protein Columns**: PG.ProteinNames, PG.ProteinGroups, file names     
+    **Peptide Columns**: PG.ProteinNames, EG.PrecursorId, file names     
+   
+    Also rename these columns.     
+    - PG.ProteinNames: *Protein Name*
+    - PG.ProteinGroups: *Accession*
+    - EG.PrecursorId: *Sequence*
+
+    Parameters:
+        file (string):  A pandas readable file with the data      
+        is_protein (bool):  True if protein file, False if peptide
+
+    Returns:
+        abundance (DataFrame):  pandas DataFrame with filtered data 
+
+    Raises:
+        FileNotFoundError:  If file does not exist
+    """
+    ## Verify that the files are valid ##
+    try:
+        df_table = pd.read_table(file, low_memory=False)
+    except FileNotFoundError:
+        print(f"File '{file}' does not exist.")
+        raise FileNotFoundError(f"File '{file}' does not exist.")
+    
+    ## Create the base abundance table ##
+    # Filters out proteins with "contam" or that are null
+    df_table = df_table[~df_table['PG.ProteinGroups'].str.contains("contam", na=False)]
+
+    # Separate the columns of just the file names, (ASSUMES run columns end in .Quantity)
+    # "EG.PrecursorId" for peptides, "PG.ProteinGroups" for protein (these are unique), 
+    # and "PG.ProteinNames" (used to filter by organism)
+    if is_protein:
+        abundance = df_table.loc[:, 
+                                (df_table.columns == 'PG.ProteinNames') | 
+                                (df_table.columns == 'PG.ProteinGroups') | 
+                                (df_table.columns.str.endswith('.Quantity'))].copy()
+        identifier = "PG.ProteinGroups"
+        new_name = "Accession"
+    else:
+        abundance = df_table.loc[:, 
+                                (df_table.columns == 'PG.ProteinNames') | 
+                                (df_table.columns == 'EG.PrecursorId') | 
+                                (df_table.columns.str.endswith('.Quantity'))].copy()
+        identifier = "EG.PrecursorId"
+        new_name = "Sequence"
+
+    ## Rename the columns ##
+    # Create a list of just the full file path names
+    run_names = abundance.columns.drop([identifier, 'PG.ProteinNames']).to_list()
+
+    # If .raw is in the file name, strip off everything after .raw.
+    if ".raw" in run_names[0]:
+        short_run_names = [name.split(".raw")[0] for name in run_names]
+    else:
+        short_run_names = [os.path.splitext(name)[0] for name in run_names]
+
+    # Create the renaming dictionary
+    rename_dict = dict(zip(run_names, short_run_names))
+    rename_dict[identifier] = new_name
+    rename_dict["PG.ProteinNames"] = "Protein Name"
+
+    # Rename the file columns
+    abundance.rename(columns=rename_dict, inplace=True)
+    return abundance
+
+
 def read_file(protein_file="", peptide_file="", file_id=0, 
               processing_app='', min_unique_peptides=1, use_maxlfq=False):
     """ Process and populate pandas DataFrames with the data from 
@@ -204,7 +274,7 @@ def read_file(protein_file="", peptide_file="", file_id=0,
         FileNotFoundError: If protein_file or peptide_file does not exist
     """
     ## Verify the processing application ##
-    supported_apps = ["diann", "fragpipe"]
+    supported_apps = ["diann", "fragpipe", "spectronaut"]
     if processing_app not in supported_apps:
         print(f"Processing app {processing_app} not currently supported.")
         raise ValueError(f"Processing app {processing_app} not currently supported.")
@@ -228,6 +298,12 @@ def read_file(protein_file="", peptide_file="", file_id=0,
         if peptide_file:
             pep_abundance = fragpipe_22_tables(peptide_file, is_protein=False)
 
+    elif processing_app == "spectronaut":
+        if protein_file:
+            prot_abundance = spectronaut_19_tables(protein_file, is_protein=True)
+        if peptide_file:
+            pep_abundance = spectronaut_19_tables(peptide_file, is_protein=False)
+
     
     ## Rename the DataFrames with run_IDs ##
     # Create a list of the run_names using pep_abundance by default
@@ -249,7 +325,7 @@ def read_file(protein_file="", peptide_file="", file_id=0,
 
     pep_abundance.rename(columns=rename_dict, inplace=True)
     prot_abundance.rename(columns=rename_dict, inplace=True)
-    
+
     return {"run_metadata": run_metadata,
             "pep_abundance": pep_abundance, 
             "prot_abundance": prot_abundance}

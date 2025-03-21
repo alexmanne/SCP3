@@ -118,7 +118,7 @@
 #   protein_file: input/dia_report.HYE_pg_matrix.tsv
 #   processing_app: diann    # Options: diann, fragpipe
 
-- peptide_file: input/sn_HYE_pep_matrix.tsv
-  protein_file: input/sn_HYE_prot_matrix.tsv
-  processing_app: diann    # Options: diann, fragpipe
+- peptide_file: input/sn_peptideQuant.tsv
+  protein_file: input/sn_ProteinQuant.tsv
+  processing_app: spectronaut    # Options: diann, fragpipe, spectronaut
 
